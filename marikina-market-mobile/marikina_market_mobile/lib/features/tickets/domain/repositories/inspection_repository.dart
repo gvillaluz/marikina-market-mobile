@@ -1,0 +1,17 @@
+import 'package:marikina_market_mobile/core/errors/result.dart';
+import 'package:marikina_market_mobile/features/tickets/data/models/params/save_inspection_params.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/vendor_summary.dart';
+
+abstract class InspectionRepository {
+  Future<Result<List<InspectionTicketSummary>>> loadInspections();
+  Future<Result<List<Ordinance>>> loadCacheOrdinances();
+  Future<Result<List<Ordinance>>> loadOrdinances();
+  Future<Result<VendorSummary>> getVendorByCode(String codeValue);
+  Future<Result<List<VendorSummary>>> getVendorByStall(String stallNumber);
+  Future<Result<FineSummary>> getTicketFineSummary(List<int> ordinanceIds, int vendorId);
+  Future<Result<SaveInspectionResult>> saveNewInspection(SaveInspectionParams params);
+}

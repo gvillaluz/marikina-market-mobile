@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "marikina_market_mobile",
+            "cwd": "marikina_market_mobile",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "marikina_market_mobile (profile mode)",
+            "cwd": "marikina_market_mobile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "marikina_market_mobile (release mode)",
+            "cwd": "marikina_market_mobile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
