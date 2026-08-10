@@ -8,6 +8,7 @@ class FineBreakdownItemModel {
   final double paymentAmount;
   final Severity severity;
   final int offenseNumber;
+  final bool isDuplicate;
 
   FineBreakdownItemModel({
     required this.ordinanceId,
@@ -16,6 +17,7 @@ class FineBreakdownItemModel {
     required this.paymentAmount,
     required this.severity,
     required this.offenseNumber,
+    required this.isDuplicate
   });
 
   factory FineBreakdownItemModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class FineBreakdownItemModel {
       paymentAmount: (json['payment_amount'] as num).toDouble(),
       severity: Severity.fromValue(json['severity'] as String),
       offenseNumber: json['offense_number'] as int,
+      isDuplicate: json['is_duplicate'] as bool
     );
   }
 
@@ -37,6 +40,7 @@ class FineBreakdownItemModel {
       paymentAmount: paymentAmount,
       severity: severity,
       offenseNumber: offenseNumber,
+      isDuplicate: isDuplicate
     );
   }
 }

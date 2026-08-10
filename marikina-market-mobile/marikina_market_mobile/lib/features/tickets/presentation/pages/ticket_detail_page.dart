@@ -41,7 +41,7 @@ class TicketDetailPage extends StatelessWidget {
             },
             builder: (context, state) {
               if (state is TicketDetailLoading) {
-                return SkeletonBox();
+                return SkeletonBox(height: 500,);
               }
 
               if (state is TicketDetailLoaded) {

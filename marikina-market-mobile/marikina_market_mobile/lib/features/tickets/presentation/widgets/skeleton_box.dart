@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class SkeletonBox extends StatefulWidget {
-  const SkeletonBox({super.key});
+  final double height;
+  const SkeletonBox({
+    required this.height,
+    super.key
+  });
 
   @override
   State<SkeletonBox> createState() => _SkeletonBoxState();
@@ -37,7 +41,7 @@ class _SkeletonBoxState extends State<SkeletonBox>
     return AnimatedBuilder(
       animation: _colorAnimation,
       builder: (context, child) => Container(
-        height: 160,
+        height: widget.height,
         margin: const EdgeInsets.symmetric(vertical: 5),
         decoration: BoxDecoration(
           color: _colorAnimation.value,

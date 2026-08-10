@@ -8,7 +8,7 @@ import 'package:marikina_market_mobile/features/tickets/presentation/inspections
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/auto_fill_btn.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/error_banner.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/qr_scanner_screen.dart';
-import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/search_by_stall_bottom_sheet.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/bottom_sheets/search_by_stall_bottom_sheet.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/violator_info_fields.dart';
 
 class ViolatorInfoCard extends StatelessWidget {

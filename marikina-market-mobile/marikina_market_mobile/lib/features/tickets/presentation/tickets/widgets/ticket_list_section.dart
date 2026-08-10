@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
@@ -19,7 +18,7 @@ class TicketListSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => const SkeletonBox(),
+                (context, index) => const SkeletonBox(height: 160,),
                 childCount: 5
               ),
             ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/widgets/evidence_gallery_screen.dart';
 
 class AddPhotoEvidenceBtn extends StatefulWidget {
   final List<XFile> photos;
@@ -90,43 +91,57 @@ class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
             itemCount: widget.photos.length,
             itemBuilder: (context, index) {
               final photo = widget.photos[index];
-              return Stack(
-                children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        File(photo.path),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: GestureDetector(
-                      onTap: () =>  widget.onPhotoRemoved(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 3,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.close,
-                          size: 16,
-                          color: AppColors.primaryBlack.withValues(alpha: .70),
+              return GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder:(context) => EvidenceGalleryScreen(
+                    imageProviders: widget.photos.map((e) => FileImage(File(e.path))).toList(),
+                    initialIndex: index,
+                    isEditing: true,
+                    onDelete: widget.onPhotoRemoved,
+                  ))
+                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Hero(
+                        tag: FileImage(File(photo.path)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(photo.path),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: GestureDetector(
+                        onTap: () =>  widget.onPhotoRemoved(index),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 3,
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.primaryBlack.withValues(alpha: .70),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),

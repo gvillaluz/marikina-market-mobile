@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
 
 class PaymentTypeSection extends StatefulWidget {
   final PenaltyType selectedPenaltyType;
+  final Severity severity;
   final double totalFineAmount;
   final ValueChanged<PenaltyType> onChangeType;
   final TextEditingController communityHrsController;
@@ -12,6 +14,7 @@ class PaymentTypeSection extends StatefulWidget {
   const PaymentTypeSection({
     super.key,
     required this.selectedPenaltyType,
+    required this.severity,
     required this.totalFineAmount,
     required this.onChangeType,
     required this.communityHrsController,
@@ -43,6 +46,8 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isHighSeverity = widget.severity == Severity.high;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -72,12 +77,14 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
                 value: PenaltyType.communityService,
                 title: 'Community service',
                 trailingText: '3 hrs',
+                disabled: isHighSeverity
               ),
               const Divider(height: 1, color:  AppColors.lightGrey),
 
               _buildOptionTile(
                 value: PenaltyType.bloodDonation,
                 title: 'Blood donation',
+                disabled: isHighSeverity
               ),
             ],
           ),
@@ -90,16 +97,19 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
     required PenaltyType value,
     required String title,
     String? trailingText,
+    bool disabled = false
   }) {
     final isSelected = _selectedType == value;
 
     return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedType = value;
-        });
-        widget.onChangeType(value);
-      },
+      onTap: disabled
+        ? null
+        : () {
+            setState(() {
+              _selectedType = value;
+            });
+            widget.onChangeType(value);
+          },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(

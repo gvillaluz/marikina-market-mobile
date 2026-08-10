@@ -18,6 +18,8 @@ import 'package:marikina_market_mobile/features/profile/presentation/pages/profi
 import 'package:marikina_market_mobile/features/splash/presentation/pages/splash_screen.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_form_data.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/pages/add_new_inspection_page.dart';
@@ -221,7 +223,7 @@ final _shellBranches = [
         path: Routes.inspetions,
         builder: (context, state) {
           return BlocProvider(
-            create: (_) => sl<InspectionBloc>()..add(LoadInspectionTickets()),
+            create: (_) => sl<InspectionBloc>()..add(LoadInspectionTickets(0, ViolationType.warning)),
             child: const InspectionsPage(),
           );
         },
@@ -235,7 +237,7 @@ final _shellBranches = [
         path: Routes.tickets,
         builder: (context, state) {
           return BlocProvider(
-            create: (_) => sl<TicketBloc>()..add(LoadTicketSummary()),
+            create: (_) => sl<TicketBloc>()..add(LoadTicketSummary(offset: 0, status: TicketStatus.active)),
             child: const TicketsPage(),
           );
         }

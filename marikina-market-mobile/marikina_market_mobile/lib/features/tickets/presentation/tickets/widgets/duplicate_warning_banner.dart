@@ -34,7 +34,7 @@ class DuplicateWarningBanner extends StatelessWidget {
             padding: EdgeInsets.only(top: 2),
             child: Icon(
               Icons.warning_amber_rounded,
-              color: Color(0xFFF57C00), // Amber warning icon
+              color: Color(0xFFF57C00),
               size: 20,
             ),
           ),
@@ -46,7 +46,7 @@ class DuplicateWarningBanner extends StatelessWidget {
                 Text(
                   titleText,
                   style: const TextStyle(
-                    color: Color(0xFFF57C00), // Amber warning header text
+                    color: Color(0xFFF57C00),
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     height: 1.3,
@@ -59,7 +59,7 @@ class DuplicateWarningBanner extends StatelessWidget {
                     child: Text(
                       ord.ordinanceNo,
                       style: const TextStyle(
-                        color: Color(0xFFD7CCC8), // Muted light grey/brown subtext
+                        color: Color(0xFFD7CCC8),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),

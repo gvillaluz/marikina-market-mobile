@@ -16,6 +16,7 @@ class TicketDetailEvidenceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: AppColors.primaryLight,
@@ -45,17 +46,18 @@ class TicketDetailEvidenceSection extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder:(context) => EvidenceGalleryScreen(
-                imageProviders: evidences.map((e) => CachedNetworkImageProvider(e)).toList(),
+                imageProviders: evidences.map((e) => CachedNetworkImageProvider('https://192.168.1.57:5001/$e')).toList(),
                 initialIndex: index,
                 isEditing: false,
               ))
             ),
             child: Positioned.fill(
               child: Hero(
-                tag: CachedNetworkImageProvider(photoUrl), 
+                tag: CachedNetworkImageProvider('https://192.168.1.57:5001/$photoUrl'), 
                 child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
-                    imageUrl: photoUrl,
+                    imageUrl: 'https://192.168.1.57:5001/$photoUrl',
                     fit: BoxFit.cover,
                     placeholder: (context, url) => const Center(
                       child: CircularProgressIndicator()

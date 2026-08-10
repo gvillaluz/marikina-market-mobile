@@ -8,8 +8,10 @@ import 'package:marikina_market_mobile/features/tickets/data/models/params/save_
 import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/vendor_summary.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/repositories/inspection_repository.dart';
 
 class InspectionRepositoryImpl implements InspectionRepository {
@@ -21,11 +23,11 @@ class InspectionRepositoryImpl implements InspectionRepository {
   );
 
   @override
-  Future<Result<List<InspectionTicketSummary>>> loadInspections() async {
+  Future<Result<PageResult<InspectionTicketSummary>>> loadInspections(int offset, ViolationType type) async {
     try {
-      final inspectionModels = await remoteDataSource.loadInspections();
+      final inspectionModels = await remoteDataSource.loadInspections(offset, type);
 
-      return Result.success(inspectionModels.map((model) => model.toEntity()).toList());
+      return Result.success(inspectionModels.toEntity((m) => m.toEntity()));
     } on UnauthorizedException catch (e) {
       return Result.failure(UnauthorizedFailure(e.message));
     } on NetworkException catch (e) {

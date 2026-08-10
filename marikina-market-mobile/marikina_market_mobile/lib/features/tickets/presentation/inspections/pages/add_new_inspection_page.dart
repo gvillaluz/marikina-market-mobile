@@ -6,9 +6,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/core/di/dependency_injection.dart';
 import 'package:marikina_market_mobile/core/router/routes.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/core/shared/presentation/widgets/app_primary_btn.dart';
 import 'package:marikina_market_mobile/core/utils/date_formatter_util.dart';
 import 'package:marikina_market_mobile/features/auth/domain/entities/user.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_breakdown_item.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_form_data.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
@@ -18,9 +20,10 @@ import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_t
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/add_photo_evidence_btn.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/dialogs/duplicate_warning_dialog.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/inspection_type_toggle.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/payment_type_section.dart';
-import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/select_ordinance_bottom_sheet.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/bottom_sheets/select_ordinance_bottom_sheet.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/ticket_violation_card.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/violator_info_card.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -176,7 +179,61 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     );
 
     if (fineSummary != null) {
-      setState(() => _fineSummary = fineSummary);
+      bool hasDuplicate = false;
+      List<FineBreakdownItem> duplicateOrdinances = [];
+      
+      setState(() {
+        _fineSummary = fineSummary;
+
+        final duplicatedSummaryIds = _fineSummary?.breakdownItems
+          .where((f) => f.isDuplicate == true)
+          .map((f) => f.ordinanceId)
+          .toSet();
+
+        if (duplicatedSummaryIds != null && duplicatedSummaryIds.isNotEmpty) {
+          hasDuplicate = true;
+
+          duplicateOrdinances = _fineSummary!.breakdownItems
+            .where((f) => f.isDuplicate == true)
+            .toList();
+
+          _selectedOrdinances.removeWhere((o) => duplicatedSummaryIds.contains(o.id));
+          _fineSummary!.breakdownItems.removeWhere((o) => o.isDuplicate);
+        }
+      });
+
+      if (hasDuplicate) {
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            backgroundColor: AppColors.tertiaryYellow,
+            leading: Icon(
+              Icons.warning,
+              color: AppColors.secondaryYellow,
+            ),
+            content: const Text(
+              'Removed: Vendor already has an open ticket for this ordinance.',
+              style: TextStyle(
+                color: AppColors.secondaryYellow
+              ),
+            ), 
+            actions: [
+              TextButton(
+                onPressed: () => showAdaptiveDialog(
+                  context: context, 
+                  builder: (_) => DuplicateWarningDialog(duplicateOrdinances: duplicateOrdinances)
+                ),
+                child: const Text(
+                  'SHOW',
+                  style: TextStyle(
+                    color: AppColors.secondaryYellow
+                  ),
+                )
+              )
+            ]
+          )
+        );
+      }
     }
   }
 
@@ -344,16 +401,21 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
                     errorMessage: _ordinanceError
                   ),
             
-                  if (_fineSummary != null && isTicket) ...{
+                  if (_fineSummary != null && 
+                      _fineSummary!.breakdownItems.isNotEmpty &&
+                      isTicket && 
+                      _selectedOrdinances.isNotEmpty) ...[
                     PaymentTypeSection(
                       selectedPenaltyType: _selectedPenaltyType,
+                      severity: _fineSummary?.severity ?? Severity.low,
                       totalFineAmount: _fineSummary?.totalPaymentAmount ?? 0.0, 
                       onChangeType: _onChangePenaltyType,
                       communityHrsController: _communityHrsController,
-                      communityHrsError: _communityHrsError
+                      communityHrsError: _communityHrsError,
+
                     ),
                     const SizedBox(height: 20,),
-                  },
+                  ],
             
                   const Text(
                     'DESCRIPTION'

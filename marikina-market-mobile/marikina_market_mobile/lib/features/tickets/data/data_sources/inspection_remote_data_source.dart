@@ -5,12 +5,14 @@ import 'package:marikina_market_mobile/features/tickets/data/models/duplicate_in
 import 'package:marikina_market_mobile/features/tickets/data/models/fine_summary_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/inspection_summary_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/ordinance_model.dart';
+import 'package:marikina_market_mobile/features/tickets/data/models/page_result_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/params/save_inspection_params.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/save_inspection_result_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/vendor_summary_model.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 
 abstract class InspectionRemoteDataSource {
-  Future<List<InspectionSummaryModel>> loadInspections();
+  Future<PageResultModel<InspectionSummaryModel>> loadInspections(int offset, ViolationType type);
   Future<List<OrdinanceModel>> getOrdinances();
   Future<VendorSummaryModel> getVendorByCode(String codeValue);
   Future<List<VendorSummaryModel>> getVendorByStall(String stallNumber);
@@ -24,17 +26,15 @@ class InspectionRemoteDataSourceImpl implements InspectionRemoteDataSource {
   InspectionRemoteDataSourceImpl(this.apiClient);
 
   @override
-  Future<List<InspectionSummaryModel>> loadInspections() async {
+  Future<PageResultModel<InspectionSummaryModel>> loadInspections(int offset, ViolationType type) async {
     try {
-      final response  = await apiClient.get('/ticket/enforcer/inspections');
+      final response  = await apiClient.get('/ticket/enforcer/inspections?offset=$offset&type=${type.value}');
 
-      final List<dynamic> data = response.data;
+      final data = response.data;
 
-      if (data.isEmpty) {
-        return [];
-      }
+      if (data == null) return PageResultModel(tickets: [], hasMore: false);
 
-      return data.map((json) => InspectionSummaryModel.fromJson(json)).toList();
+      return PageResultModel.fromJson(data, (json) => InspectionSummaryModel.fromJson(json));
     } on DioException catch(e) {
       if (e.response?.statusCode == 404) throw ValidationException(e.response?.data['message'] ?? '');
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -96,7 +95,7 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: context.pop, 
+                    onPressed: Navigator.of(context).pop, 
                     icon: Icon(
                       Icons.close,
                       color: AppColors.primaryLight,

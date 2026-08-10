@@ -13,8 +13,9 @@ class InspectionLoading extends InspectionState {}
 
 class InspectionTicketsLoaded extends InspectionState {
   final List<InspectionTicketSummary> ticketSummary;
+  final bool hasMore;
 
-  InspectionTicketsLoaded(this.ticketSummary);
+  InspectionTicketsLoaded(this.ticketSummary, this.hasMore);
 }
 
 class InspectionError extends InspectionState {

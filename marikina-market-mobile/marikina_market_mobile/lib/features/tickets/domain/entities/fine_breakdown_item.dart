@@ -7,6 +7,7 @@ class FineBreakdownItem {
   final double paymentAmount;
   final Severity severity;
   final int offenseNumber;
+  final bool isDuplicate;
 
-  FineBreakdownItem({required this.ordinanceId, required this.ordinanceNo, required this.ordinanceCode, required this.paymentAmount, required this.severity, required this.offenseNumber});
+  FineBreakdownItem({required this.ordinanceId, required this.ordinanceNo, required this.ordinanceCode, required this.paymentAmount, required this.severity, required this.offenseNumber, required this.isDuplicate});
 }

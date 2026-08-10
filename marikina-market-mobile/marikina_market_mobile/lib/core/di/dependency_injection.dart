@@ -40,6 +40,7 @@ import 'package:marikina_market_mobile/features/tickets/domain/use_cases/get_fin
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_inspection_list_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ordinances_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ticket_detail_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ticket_list_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/save_inspection_ticket_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/search_vendor_by_code_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/search_vendor_by_stall_use_case.dart';
@@ -66,6 +67,7 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
   sl.registerLazySingleton(() => ConnectivityCubit(sl()));
 
 
+
   sl.registerLazySingleton<AuthLocalDataSource>(() => AuthLocalDataSourceImpl(storageService: sl()));
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(apiClient: sl()));
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(localDataSource: sl(), remoteDataSource: sl()));
@@ -83,6 +85,7 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
     refreshTokensUseCase: sl()
   ));
   sl.registerLazySingleton(() => AppRouter(authBloc: sl()));
+
 
 
   sl.registerLazySingleton<Box<OrdinanceHiveModel>>(() => ordinanceBox);
@@ -104,12 +107,17 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
     saveInspectionTicketUseCase: sl()
   ));
 
+
+
   sl.registerLazySingleton<TicketRemoteDataSource>(() => TicketRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<TicketRepository>(() => TicketRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => LoadTicketListUseCase(sl()));
   sl.registerLazySingleton(() => LoadTicketDetailUseCase(sl()));
   sl.registerFactory(() => TicketBloc(
+    loadTicketListUseCase: sl(),
     loadTicketDetailUseCase: sl()
   ));
+
 
   
   sl.registerLazySingleton<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(sl()));

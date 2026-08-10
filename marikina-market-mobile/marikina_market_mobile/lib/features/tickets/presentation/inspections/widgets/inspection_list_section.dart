@@ -18,7 +18,7 @@ class InspectionListSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => const SkeletonBox(),
+                (context, index) => const SkeletonBox(height: 160,),
                 childCount: 5
               ),
             ),

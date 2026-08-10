@@ -134,7 +134,7 @@ class TicketCard extends StatelessWidget {
                   const SizedBox(width: 10,),
 
                   Text(
-                    DateTimeFormatter.getDateTime(ticketSummary.createdAt),
+                    DateTimeFormatter.getDateTime(ticketSummary.issuedAt),
                     style: TextStyle(
                       fontSize: 14
                     ),
@@ -149,8 +149,8 @@ class TicketCard extends StatelessWidget {
                     )
                   ),
                   onPressed: () {
-                    context.goNamed(Routes.ticketDetailName, pathParameters: {
-                      'controlNumber': ticketSummary.businessName
+                    context.pushNamed(Routes.ticketDetailName, pathParameters: {
+                      'ticketId': ticketSummary.ticketId.toString()
                     });
                   }, 
                   child: const Text(

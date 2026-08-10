@@ -10,6 +10,7 @@ class AppRouter {
   AppRouter({required this.authBloc});
 
   late final GoRouter router = GoRouter(
+    restorationScopeId: 'router',
     initialLocation: Routes.splash,
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {

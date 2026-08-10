@@ -9,7 +9,11 @@ class LoadOrdinances extends InspectionEvent {}
 
 class LoadOrdinanceSelection extends InspectionEvent {}
 
-class LoadInspectionTickets extends InspectionEvent {}
+class LoadInspectionTickets extends InspectionEvent {
+  final int offset;
+  final ViolationType type;
+  LoadInspectionTickets(this.offset, this.type);
+}
 
 class SearchByCodeRequested extends InspectionEvent {
   final String codeValue;

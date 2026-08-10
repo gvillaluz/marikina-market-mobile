@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
       ], 
       child: MaterialApp.router(
         theme: AppTheme.light,
+        restorationScopeId: 'app',
         routerConfig: sl<AppRouter>().router,
         debugShowCheckedModeBanner: false,
       )

@@ -33,51 +33,103 @@ class TicketDetailContent extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.tertiaryYellow,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.primaryYellow,
+                width: 1.5,
+              ),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
-                  spacing: 10,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.warning,
-                      color: AppColors.secondaryYellow,
-                    ),
-                    Expanded(
-                      child: Text(
-                        '${droppedOrdinances?.length} ordinance was already ticketed today for this vendor and was excluded.',
-                        style: TextStyle(
-                          color: AppColors.secondaryYellow
+                    Container(
+                      width: 24,
+                      height: 24,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.secondaryYellow,
+                          width: 1.5,
                         ),
                       ),
-                    )
+                      child: Text(
+                        '!',
+                        style: TextStyle(
+                          color: AppColors.secondaryYellow,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ordinance Skipped',
+                            style: TextStyle(
+                              color: AppColors.secondaryYellow,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'This vendor already has an open ticket for multiple ordinance, so it wasn\'t added again.',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
 
-                const SizedBox(height: 10,),
+                const SizedBox(height: 16),
 
-                ListView.separated(
-                  separatorBuilder: (context, index) => const SizedBox(height: 10,),
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: droppedOrdinances!.length,
-                  itemBuilder:(context, index) => Container(
-                    decoration: BoxDecoration(
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.tertiaryYellow,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
                       color: AppColors.primaryYellow,
-                      borderRadius: BorderRadius.circular(10)
+                      width: 1,
                     ),
-                    child: ListTile(
+                  ),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    separatorBuilder: (context, index) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.primaryYellow,
+                    ),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: droppedOrdinances!.length,
+                    itemBuilder: (context, index) => ListTile(
                       title: Text(
                         droppedOrdinances![index].ordinanceNo,
-                        style: TextStyle(
-                          fontSize: 14
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      subtitle: Text(droppedOrdinances![index].ordinanceCode),
+                      subtitle: Text(
+                        droppedOrdinances![index].ordinanceCode,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -85,7 +137,7 @@ class TicketDetailContent extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20,)
+          const SizedBox(height: 20),
         ],
 
         Text(

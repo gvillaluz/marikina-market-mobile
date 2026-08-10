@@ -52,7 +52,7 @@ class PhotoEvidencePreviewSection extends StatelessWidget {
             ),
             child: Positioned.fill(
               child: Hero(
-                tag: photoUrl,
+                tag: FileImage(File(photoUrl.path)),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.file(

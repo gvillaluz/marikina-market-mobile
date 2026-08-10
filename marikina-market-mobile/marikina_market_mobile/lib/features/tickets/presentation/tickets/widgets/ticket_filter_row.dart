@@ -3,7 +3,12 @@ import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
 
 class TicketFilterRow extends StatefulWidget {
+  final TicketStatus statusSelected;
+  final ValueChanged<TicketStatus> onChange;
+
   const TicketFilterRow({
+    required this.statusSelected,
+    required this.onChange,
     super.key,
   });
 
@@ -12,19 +17,17 @@ class TicketFilterRow extends StatefulWidget {
 }
 
 class _TicketFilterRowState extends State<TicketFilterRow> {
-  int ticketStatusSelected = 1;
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: Wrap(
         spacing: 5,
-        children: TicketStatus.values.asMap().entries.map((entry) {
-          final isSelected = entry.key + 1 == ticketStatusSelected;
+        children: TicketStatus.values.map((entry) {
+          final isSelected = widget.statusSelected == entry;
 
           return ChoiceChip(
-            label: Text(entry.value.value), 
+            label: Text(entry.value), 
             selected: isSelected,
             
             labelStyle: TextStyle(
@@ -37,11 +40,7 @@ class _TicketFilterRowState extends State<TicketFilterRow> {
             ),
             showCheckmark: false,
 
-            onSelected: (bool selected) {
-              setState(() {
-                ticketStatusSelected = entry.key + 1;
-              });
-            },
+            onSelected: (bool selected) => widget.onChange(entry)
           );
         }).toList()
       )

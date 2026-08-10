@@ -5,7 +5,9 @@ import 'package:marikina_market_mobile/features/tickets/data/models/params/save_
 import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/get_fine_summary_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_inspection_list_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ordinances_use_case.dart';
@@ -58,17 +60,18 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
   Future<void> _onLoadInspectionTickets(LoadInspectionTickets event, Emitter<InspectionState> emit) async {
     emit(InspectionLoading());
 
-    final result = await loadInspectionListUseCase();
+    final result = await loadInspectionListUseCase(event.offset, event.type);
 
     switch (result) {
-      
-      case Success<List<InspectionTicketSummary>>():
-        _inspectionSummary = result.data;
+      case Success<PageResult<InspectionTicketSummary>>():
+        _inspectionSummary = event.offset == 0
+          ? result.data.tickets
+          : [..._inspectionSummary, ...result.data.tickets];
         _hasLoadedTickets = true;
-        emit(InspectionTicketsLoaded(_inspectionSummary));
+        emit(InspectionTicketsLoaded(_inspectionSummary, result.data.hasMore));
         
-      case ResultFailure<List<InspectionTicketSummary>>():
-        emit(InspectionTicketsLoaded([]));
+      case ResultFailure<PageResult<InspectionTicketSummary>>():
+        emit(InspectionTicketsLoaded([], false));
     }
   }
 
@@ -169,7 +172,7 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
         if (_hasLoadedTickets) {
           _inspectionSummary = [..._inspectionSummary, data.inspectionSummary];
         } else {
-          add(LoadInspectionTickets());
+          add(LoadInspectionTickets(0, ViolationType.warning));
         }
       
       case ResultFailure(failure: NetworkFailure(: final message) ||

@@ -9,7 +9,8 @@ class TicketLoading extends TicketState {}
 
 class TicketsLoaded extends TicketState {
   final List<TicketSummary> ticketSummary;
-  TicketsLoaded(this.ticketSummary);
+  final bool hasMore;
+  TicketsLoaded(this.ticketSummary, this.hasMore);
 }
 
 class TicketError extends TicketState {
