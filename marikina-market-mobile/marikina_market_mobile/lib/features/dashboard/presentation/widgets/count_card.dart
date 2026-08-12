@@ -16,7 +16,7 @@ class CountCard extends StatelessWidget {
     if (type == 'Ticket') {
       return AppColors.secondaryRed;
     } else if (type == 'Warning') {
-      return AppColors.primaryYellow;
+      return Color(0xFFFDF3DC);
     }
     return AppColors.tertiary;
   }
@@ -25,7 +25,7 @@ class CountCard extends StatelessWidget {
     if (type == 'Ticket') {
       return AppColors.primaryRed;
     } else if (type == 'Warning') {
-      return AppColors.primaryBlack;
+      return AppColors.secondaryYellow;
     }
     return AppColors.primary;
   }

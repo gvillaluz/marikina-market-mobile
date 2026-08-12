@@ -15,7 +15,9 @@ class SaveInspectionResultModel {
       duplicateOrdinances: (json['duplicate_ordinances'] as List<dynamic>?)
         ?.map((e) => DuplicateInfoModel.fromJson(e as Map<String, dynamic>))
         .toList(),
-      warningMessageForDuplicates: json['warning_message_for_duplicates'] as String
+      warningMessageForDuplicates: json['warning_message_for_duplicates'] != null
+        ? json['warning_message_for_duplicates'] as String
+        : null
     );
   }
 

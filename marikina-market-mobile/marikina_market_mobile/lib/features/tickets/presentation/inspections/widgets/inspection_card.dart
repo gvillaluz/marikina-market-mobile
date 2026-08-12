@@ -115,7 +115,7 @@ class InspectionCard extends StatelessWidget {
             );
           }),
 
-          Divider(
+          const Divider(
             thickness: 1,
             color: AppColors.lightGrey,
           ),
@@ -128,13 +128,13 @@ class InspectionCard extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.calendar_today,
-                    size: 20,
+                    size: 18,
                   ),
 
                   const SizedBox(width: 10,),
 
                   Text(
-                    DateTimeFormatter.getDateTime(ticketSummary.issuedAt),
+                    DateTimeFormatter.getShortDateTime(ticketSummary.issuedAt),
                     style: TextStyle(
                       fontSize: 14
                     ),

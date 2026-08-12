@@ -9,7 +9,9 @@ import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_bloc
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/pages/mandatory_change_password_page.dart';
-import 'package:marikina_market_mobile/features/layout/presentation/pages/dashboard_page.dart';
+import 'package:marikina_market_mobile/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:marikina_market_mobile/features/dashboard/presentation/bloc/dashboard_event.dart';
+import 'package:marikina_market_mobile/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:marikina_market_mobile/features/layout/presentation/pages/root_screen.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/pages/change_password_page.dart';
@@ -212,7 +214,12 @@ final _shellBranches = [
       GoRoute(
         name: Routes.dashboardName,
         path: Routes.dashboard,
-        builder:(context, state) => const DashboardPage(),
+        builder: (context, state) {
+          return BlocProvider(
+            create: (_) => sl<DashboardBloc>()..add(LoadDashboardSummary()),
+            child: const DashboardPage(),
+          );
+        },
       )
     ]
   ),

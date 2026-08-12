@@ -6,33 +6,64 @@ class FormTypeOption extends StatelessWidget {
   final ViolationType selectedType;
   final ViolationType formType;
   final ValueChanged<ViolationType> onChange;
+  final bool? isEnabled;
 
   const FormTypeOption({
     required this.selectedType,
     required this.formType,
     required this.onChange,
+    this.isEnabled,
     super.key
   });
 
   @override
   Widget build(BuildContext context) {
     bool isSelected = selectedType == formType;
+    bool isWarningBlocked = formType == ViolationType.warning && isEnabled == false;
+    bool canSelect = !isWarningBlocked;
 
     return GestureDetector(
-      onTap: () => onChange(formType),
+      onTap: canSelect
+        ? () => onChange(formType)
+        : null,
       child: AnimatedContainer(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : null,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(10),
+          color: isSelected ? AppColors.primary : AppColors.lightGrey.withValues(alpha: .10),
+          border: Border.all(
+            color: isSelected 
+              ? AppColors.primary
+              : isWarningBlocked
+                ? AppColors.lightGrey.withValues(alpha: .50)
+                : AppColors.primary,
+            ),
         ),
         alignment: Alignment.center,
         duration: const Duration(milliseconds: 200),
-        child: Text(
-          formType.value,
-          style: const TextStyle(
-            fontSize: 16
-          ),
+        child: Row(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (isWarningBlocked) ...[
+              Icon(
+                Icons.warning,
+                color: AppColors.lightGrey.withValues(alpha: .50),
+              )
+            ],
+
+            Text(
+              formType.value,
+              style: TextStyle(
+                fontSize: 16,
+                color: isSelected 
+                  ? AppColors.primaryLight
+                  : isWarningBlocked 
+                    ? AppColors.lightGrey.withValues(alpha: .50)
+                    : AppColors.primary 
+              ),
+            ),
+          ],
         ),
       ),
     );

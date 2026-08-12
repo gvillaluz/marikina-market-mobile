@@ -13,7 +13,7 @@ class SplashScreen extends StatelessWidget {
         ),
         height: double.infinity,
         width: double.infinity,
-        child: Center(
+        child: const Center(
           child: SizedBox(
             child: CircularProgressIndicator(
               color: AppColors.primaryLight,

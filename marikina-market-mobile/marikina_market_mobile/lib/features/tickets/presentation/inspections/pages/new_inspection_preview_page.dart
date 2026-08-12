@@ -94,10 +94,8 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
 
           if (state is SubmitNewTicketSuccess) {
             disposeDialog();
-
             final result = state.result;
 
-            debugPrint("GOING TO TICKET DETAIL");
             context.goNamed(
               Routes.ticketDetailName,
               pathParameters: {'ticketId': result.inspectionSummary.ticketId.toString()},
@@ -271,9 +269,9 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
         
                       if (fineSummary != null && penaltyType != null && isTicket) ...[
                         const SizedBox(height: 20,),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20, right: 20),
-                          child: const Divider(),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 20, right: 20),
+                          child: Divider(),
                         ),
                         const SizedBox(height: 20,),
         

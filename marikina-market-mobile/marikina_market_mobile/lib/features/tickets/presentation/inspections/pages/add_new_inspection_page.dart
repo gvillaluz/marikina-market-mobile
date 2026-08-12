@@ -25,6 +25,7 @@ import 'package:marikina_market_mobile/features/tickets/presentation/inspections
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/payment_type_section.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/bottom_sheets/select_ordinance_bottom_sheet.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/ticket_violation_card.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/vendor_summary_banner.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/violator_info_card.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -70,8 +71,10 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
   @override
   void initState() {
     super.initState();
-    WakelockPlus.enable();
-    context.read<InspectionBloc>().add(LoadOrdinances());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WakelockPlus.enable();
+      context.read<InspectionBloc>().add(LoadOrdinances());
+    });
   }
 
   @override
@@ -151,9 +154,9 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
   Future<void> _handleOrdinanceSelect(BuildContext context) async {
     if (_vendorSummary == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           backgroundColor: AppColors.primary,
-          content: const Text(
+          content: Text(
             'Please fill out vendor\'s information first.',
             style: TextStyle(color: AppColors.primaryLight),
           )
@@ -207,7 +210,7 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
           MaterialBanner(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             backgroundColor: AppColors.tertiaryYellow,
-            leading: Icon(
+            leading: const Icon(
               Icons.warning,
               color: AppColors.secondaryYellow,
             ),
@@ -253,6 +256,8 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
       _lastNameController.text = vendor.lastName;
       _firstNameController.text = vendor.firstName;
       _middleNameController.text = vendor.middleName;
+
+      _selectedType = vendor.canIssueWarning ? _selectedType : ViolationType.ticket;
     });
   }
 
@@ -355,157 +360,220 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InspectionTypeToggle(
-                    selected: _selectedType, 
-                    onChange: (type) => setState(() {
-                       _selectedType = type;
-                       _selectedOrdinances = [];
-                       _fineSummary = null;
-                      _photoError = null;
-                      _ordinanceError = null;
-                      _communityHrsError = null;
-                    })
-                  ),
+                  // Column(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     _buildRowLabel('DATE:', DateTimeFormatter.getDate(DateTime.now())),
+                  //     const SizedBox(height: 5,),
+                  //     _buildRowLabel('MARKET ENFORCER:', '${widget.user.firstName} ${widget.user.lastName}'),
+                  //   ],
+                  // ),
             
-                  const SizedBox(height: 20,),
-                  
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildRowLabel('DATE:', DateTimeFormatter.getDate(DateTime.now())),
-                      const SizedBox(height: 5,),
-                      _buildRowLabel('MARKET ENFORCER:', '${widget.user.firstName} ${widget.user.lastName}'),
-                    ],
-                  ),
+                  // const SizedBox(height: 20,),
             
-                  const SizedBox(height: 20,),
-            
-                  ViolatorInfoCard(
-                    stallNumberController: _stallNumberController,
-                    tradeNameController: _tradeNameController,
-                    lastNameController: _lastNameController,
-                    firstNameController: _firstNameController,
-                    middleNameController: _middleNameController,
-                    onVendorSelected: _populateVendorInfo,
-                    errorMessage: _vendorError
-                  ),
-            
-                  const SizedBox(height: 20,),
-            
-                  TicketViolationCard(
-                    onPressed: _handleOrdinanceSelect,
-                    ordinances: _selectedOrdinances,
-                    capturedPhotos: _capturedEvidences,
-                    fineSummary: _fineSummary,
-                    isTicket: isTicket,
-                    errorMessage: _ordinanceError
-                  ),
-            
-                  if (_fineSummary != null && 
-                      _fineSummary!.breakdownItems.isNotEmpty &&
-                      isTicket && 
-                      _selectedOrdinances.isNotEmpty) ...[
-                    PaymentTypeSection(
-                      selectedPenaltyType: _selectedPenaltyType,
-                      severity: _fineSummary?.severity ?? Severity.low,
-                      totalFineAmount: _fineSummary?.totalPaymentAmount ?? 0.0, 
-                      onChangeType: _onChangePenaltyType,
-                      communityHrsController: _communityHrsController,
-                      communityHrsError: _communityHrsError,
-
+                  if (_vendorSummary == null) ...[
+                    ViolatorInfoCard(
+                      // stallNumberController: _stallNumberController,
+                      // tradeNameController: _tradeNameController,
+                      // lastNameController: _lastNameController,
+                      // firstNameController: _firstNameController,
+                      // middleNameController: _middleNameController,
+                      onVendorSelected: _populateVendorInfo,
+                      errorMessage: _vendorError
                     ),
-                    const SizedBox(height: 20,),
                   ],
             
-                  const Text(
-                    'DESCRIPTION'
-                  ),
-                  const SizedBox(height: 5,),
-                  TextFormField(
-                    controller: _ticketDescriptionController,
-                    maxLines: 5,
-                    minLines: 3,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Description is required.';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      errorText: _descriptionError,
-                      border: const OutlineInputBorder(),
+                  const SizedBox(height: 20,),
+
+                  if (_vendorSummary != null) ...[
+                    VendorSummaryBanner(
+                      vendor: _vendorSummary!,
+                      onChangeVendor: () => setState(() => _vendorSummary = null),
                     ),
-                  ),
-            
-                  if (isTicket) ...[
+
                     const SizedBox(height: 20,),
+
+                    InspectionTypeToggle(
+                      selected: _selectedType, 
+                      onChange: (type) => setState(() {
+                        _selectedType = type;
+                        _selectedOrdinances = [];
+                        _fineSummary = null;
+                        _photoError = null;
+                        _ordinanceError = null;
+                        _communityHrsError = null;
+                      }),
+                      isEnabled: _vendorSummary!.canIssueWarning,
+                    ),
+              
+                    const SizedBox(height: 20,),
+
+                    if (!_vendorSummary!.canIssueWarning) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                        decoration: BoxDecoration(
+                          color: AppColors.tertiaryYellow.withValues(alpha: .50),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primaryYellow
+                          )
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 10,
+                          children: [
+                            Icon(
+                              Icons.warning_amber,
+                              color: AppColors.secondaryYellow,
+                              size: 30,
+                            ),
+                            Expanded(
+                              child: Column(
+                                spacing: 5,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'A warning has already been issued to this vendor for this week.',
+                                    style: TextStyle(
+                                      color: AppColors.secondaryYellow,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    softWrap: true,
+                                  ),
+                                  
+                                  if (_vendorSummary?.activeWarningIssuedAt != null) ...[
+                                    Text(
+                                    DateTimeFormatter.getDateTime(_vendorSummary!.activeWarningIssuedAt!),
+                                      style: TextStyle(
+                                        color: AppColors.mediumGrey
+                                      ),
+                                    )
+                                  ]
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+
+                    const SizedBox(height: 20),
+              
+                    TicketViolationCard(
+                      onPressed: _handleOrdinanceSelect,
+                      ordinances: _selectedOrdinances,
+                      capturedPhotos: _capturedEvidences,
+                      fineSummary: _fineSummary,
+                      isTicket: isTicket,
+                      errorMessage: _ordinanceError
+                    ),
+              
+                    if (_fineSummary != null && 
+                        _fineSummary!.breakdownItems.isNotEmpty &&
+                        isTicket && 
+                        _selectedOrdinances.isNotEmpty) ...[
+                      PaymentTypeSection(
+                        selectedPenaltyType: _selectedPenaltyType,
+                        severity: _fineSummary?.severity ?? Severity.low,
+                        totalFineAmount: _fineSummary?.totalPaymentAmount ?? 0.0, 
+                        onChangeType: _onChangePenaltyType,
+                        communityHrsController: _communityHrsController,
+                        communityHrsError: _communityHrsError,
+
+                      ),
+                      const SizedBox(height: 20,),
+                    ],
+              
                     const Text(
-                      'PHOTO EVIDENCE'
+                      'DESCRIPTION'
                     ),
                     const SizedBox(height: 5,),
-            
-                    AddPhotoEvidenceBtn(
-                        photos: _capturedEvidences,
-                        onPhotoAdded: (photo) => addEvidence(photo),
-                        onPhotoRemoved: (index) => removeEvidence(index),
-                        isInvalid: _photoError != null,
-                      ),
-            
-                    if (_photoError != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const SizedBox(width: 15,),
-                          Text(
-                            _photoError!,
-                            style: const TextStyle(
-                              color: AppColors.primaryRed,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-            
-                  const SizedBox(height: 30,),
-            
-                  AppPrimaryButton(
-                    label: 'Submit ${isTicket ? 'Ticket': 'Warning'}', 
-                    iconData: Icons.gavel, 
-                    onPressed: _submit
-                  ),
-            
-                  const SizedBox(height: 10,),
-            
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryRed,
-                        backgroundColor: AppColors.secondaryRed.withValues(alpha: .30),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        side: BorderSide(
-                          color: AppColors.primaryRed
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                      ),
-                      onPressed: () async {
-                        if (_isFormEmpty) {
-                          Navigator.of(context).pop();
-                        } else if (await _confirmDiscard(context) && context.mounted) {
-                          Navigator.of(context).pop();
+                    TextFormField(
+                      controller: _ticketDescriptionController,
+                      maxLines: 5,
+                      minLines: 3,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Description is required.';
                         }
-                      }, 
-                      child: const Text('Cancel')
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        errorText: _descriptionError,
+                        border: const OutlineInputBorder(),
+                      ),
                     ),
-                  )
+              
+                    if (isTicket) ...[
+                      const SizedBox(height: 20,),
+                      const Text(
+                        'PHOTO EVIDENCE'
+                      ),
+                      const SizedBox(height: 5,),
+              
+                      AddPhotoEvidenceBtn(
+                          photos: _capturedEvidences,
+                          onPhotoAdded: (photo) => addEvidence(photo),
+                          onPhotoRemoved: (index) => removeEvidence(index),
+                          isInvalid: _photoError != null,
+                        ),
+              
+                      if (_photoError != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const SizedBox(width: 15,),
+                            Text(
+                              _photoError!,
+                              style: const TextStyle(
+                                color: AppColors.primaryRed,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+
+                    const SizedBox(height: 30,),
+            
+                    AppPrimaryButton(
+                      label: 'Submit ${isTicket ? 'Ticket': 'Warning'}', 
+                      iconData: Icons.gavel, 
+                      onPressed: _submit
+                    ),
+              
+                    const SizedBox(height: 10,),
+              
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryRed,
+                          backgroundColor: AppColors.secondaryRed.withValues(alpha: .30),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          side: BorderSide(
+                            color: AppColors.primaryRed
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                        ),
+                        onPressed: () async {
+                          if (_isFormEmpty) {
+                            Navigator.of(context).pop();
+                          } else if (await _confirmDiscard(context) && context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        }, 
+                        child: const Text('Cancel')
+                      ),
+                    )
+                  ],
                 ],
               ),
             ),
@@ -515,25 +583,25 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     );
   }
 
-  Row _buildRowLabel(String label, String value) {
-    return Row(
-      spacing: 5,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 15,
-            color: AppColors.lightGrey
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15
-          ),
-        )
-      ],
-    );
-  }
+  // Row _buildRowLabel(String label, String value) {
+  //   return Row(
+  //     spacing: 5,
+  //     children: [
+  //       Text(
+  //         label,
+  //         style: TextStyle(
+  //           fontSize: 15,
+  //           color: AppColors.lightGrey
+  //         ),
+  //       ),
+  //       Text(
+  //         value,
+  //         style: const TextStyle(
+  //           fontWeight: FontWeight.bold,
+  //           fontSize: 15
+  //         ),
+  //       )
+  //     ],
+  //   );
+  // }
 }

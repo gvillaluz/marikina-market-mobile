@@ -21,7 +21,9 @@ class ViolationSummaryModel {
       ordinanceNo: json['ordinance_no'] as String, 
       ordinanceCode: json['ordinance_code'] as String, 
       offenseNumber: json['offense_count'] as int,
-      paymentAmount: json['penalty_amount'] as double
+      paymentAmount: json['penalty_amount'] != null
+        ? json['penalty_amount'] as double
+        : null
     );
   }
 

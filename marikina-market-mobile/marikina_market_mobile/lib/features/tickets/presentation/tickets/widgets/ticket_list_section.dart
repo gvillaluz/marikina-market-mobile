@@ -4,7 +4,7 @@ import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_state.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_card.dart';
-import 'package:marikina_market_mobile/features/tickets/presentation/widgets/skeleton_box.dart';
+import 'package:marikina_market_mobile/core/shared/presentation/widgets/skeleton_box.dart';
 
 class TicketListSection extends StatelessWidget {
   const TicketListSection({super.key});

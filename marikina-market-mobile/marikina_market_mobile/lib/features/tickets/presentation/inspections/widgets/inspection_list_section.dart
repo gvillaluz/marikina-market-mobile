@@ -4,7 +4,7 @@ import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_state.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/inspection_card.dart';
-import 'package:marikina_market_mobile/features/tickets/presentation/widgets/skeleton_box.dart';
+import 'package:marikina_market_mobile/core/shared/presentation/widgets/skeleton_box.dart';
 
 class InspectionListSection extends StatelessWidget {
   const InspectionListSection({super.key});

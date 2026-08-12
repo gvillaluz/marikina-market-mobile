@@ -82,8 +82,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (e.response?.statusCode == 401) throw TokenExpiredException("Invalid Session.");
 
       if (e.response?.statusCode == 400) {
-      throw UnauthorizedException(e.response?.data['message'] ?? 'Invalid current or new password.');
-    }
+        throw UnauthorizedException(e.response?.data['message'] ?? 'Invalid current or new password.');
+      }
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.connectionError ||

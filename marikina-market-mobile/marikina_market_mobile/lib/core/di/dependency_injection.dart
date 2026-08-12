@@ -22,6 +22,11 @@ import 'package:marikina_market_mobile/features/auth/domain/use_cases/mandatory_
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/refresh_tokens_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:marikina_market_mobile/features/dashboard/data/data_sources/dashboard_remote_data_source.dart';
+import 'package:marikina_market_mobile/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:marikina_market_mobile/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:marikina_market_mobile/features/dashboard/domain/use_cases/load_dashboard_summary_use_case.dart';
+import 'package:marikina_market_mobile/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:marikina_market_mobile/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:marikina_market_mobile/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:marikina_market_mobile/features/profile/domain/repositories/profile_repository.dart';
@@ -85,6 +90,15 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
     refreshTokensUseCase: sl()
   ));
   sl.registerLazySingleton(() => AppRouter(authBloc: sl()));
+
+
+
+  sl.registerLazySingleton<DashboardRemoteDataSource>(() => DashboardRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<DashboardRepository>(() => DashboardRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => LoadDashboardSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => DashboardBloc(
+    loadDashboardSummaryUseCase: sl()
+  ));
 
 
 

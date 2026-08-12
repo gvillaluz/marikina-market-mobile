@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_state.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_detail_content.dart';
-import 'package:marikina_market_mobile/features/tickets/presentation/widgets/skeleton_box.dart';
+import 'package:marikina_market_mobile/core/shared/presentation/widgets/skeleton_box.dart';
 
 class TicketDetailPage extends StatelessWidget {
   final List<DuplicateOrdinance>? droppedOrdinances;
@@ -19,6 +21,16 @@ class TicketDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.goNamed(Routes.inspectionsName);
+            }
+          },
+        ),
         title: const Text(
           'Inspections',
           style: TextStyle(

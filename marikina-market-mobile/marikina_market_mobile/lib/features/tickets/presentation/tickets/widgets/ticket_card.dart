@@ -63,7 +63,8 @@ class TicketCard extends StatelessWidget {
                     '#${ticketSummary.controlNumber}',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryRed
                     ),
                   )
                 ],
@@ -134,7 +135,7 @@ class TicketCard extends StatelessWidget {
                   const SizedBox(width: 10,),
 
                   Text(
-                    DateTimeFormatter.getDateTime(ticketSummary.issuedAt),
+                    DateTimeFormatter.getShortDateTime(ticketSummary.issuedAt),
                     style: TextStyle(
                       fontSize: 14
                     ),
