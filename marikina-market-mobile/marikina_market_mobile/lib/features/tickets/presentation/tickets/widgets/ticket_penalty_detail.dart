@@ -19,15 +19,18 @@ class TicketPenaltyDetail extends StatelessWidget {
     required this.dueDate,
     this.totalFineAmount,
     this.communityHrs,
-    super.key
+    super.key,
   });
 
-  static final _currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
+  static final _currencyFormat = NumberFormat.currency(
+    locale: 'en_PH',
+    symbol: '₱',
+  );
 
   Color _getBgColor() {
     if (severity == Severity.high) {
       return AppColors.secondaryRed;
-    } else if (severity == Severity.medium) {
+    } else if (severity == Severity.moderate) {
       return AppColors.primaryYellow;
     } else {
       return AppColors.tertiary;
@@ -37,7 +40,7 @@ class TicketPenaltyDetail extends StatelessWidget {
   Color _getColor() {
     if (severity == Severity.high) {
       return AppColors.primaryRed;
-    } else if (severity == Severity.medium) {
+    } else if (severity == Severity.moderate) {
       return AppColors.secondaryYellow;
     } else {
       return AppColors.primary;
@@ -46,7 +49,9 @@ class TicketPenaltyDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final penalty = penaltyType == PenaltyType.communityService ? '${penaltyType.value} ($communityHrs hrs)' : penaltyType.value;
+    final penalty = penaltyType == PenaltyType.communityService
+        ? '${penaltyType.value} ($communityHrs hrs)'
+        : penaltyType.value;
 
     return Column(
       children: [
@@ -57,27 +62,21 @@ class TicketPenaltyDetail extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
               decoration: BoxDecoration(
                 color: AppColors.primary,
-                borderRadius: BorderRadius.circular(50)
+                borderRadius: BorderRadius.circular(50),
               ),
               child: const Text(
                 '₱',
-                style: TextStyle(
-                  color: AppColors.primaryLight,
-                  fontSize: 16
-                ),
+                style: TextStyle(color: AppColors.primaryLight, fontSize: 16),
               ),
             ),
             const Text(
               'PENALTY DETAILS',
-              style: TextStyle(
-                fontSize: 18,
-                color: AppColors.primary
-              ),
-            )
+              style: TextStyle(fontSize: 18, color: AppColors.primary),
+            ),
           ],
         ),
 
-        const SizedBox(height: 20,),
+        const SizedBox(height: 20),
 
         Column(
           spacing: 10,
@@ -89,30 +88,35 @@ class TicketPenaltyDetail extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: _getBgColor()
+                    color: _getBgColor(),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   child: Text(
                     severity.value,
-                    style: TextStyle(
-                      color: _getColor()
-                    ),
+                    style: TextStyle(color: _getColor()),
                   ),
-                )
+                ),
               ],
             ),
             DetailRow(label: 'PENALTY TYPE:', value: penalty),
-            DetailRow(label: 'DUE DATE:', value: '${DateTimeFormatter.getDate(dueDate)}, (15 days from issuance)')
+            DetailRow(
+              label: 'DUE DATE:',
+              value:
+                  '${DateTimeFormatter.getDate(dueDate)}, (15 days from issuance)',
+            ),
           ],
         ),
 
-        const SizedBox(height: 10,),
+        const SizedBox(height: 10),
 
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppColors.tertiary,
-            borderRadius: BorderRadius.circular(10)
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -122,7 +126,7 @@ class TicketPenaltyDetail extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 16,
-                  fontWeight: FontWeight.bold
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
@@ -130,9 +134,9 @@ class TicketPenaltyDetail extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 16,
-                  fontWeight: FontWeight.bold
+                  fontWeight: FontWeight.bold,
                 ),
-              )
+              ),
             ],
           ),
         ),

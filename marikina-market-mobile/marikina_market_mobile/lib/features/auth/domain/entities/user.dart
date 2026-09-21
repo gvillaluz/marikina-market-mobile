@@ -4,25 +4,33 @@ import 'package:marikina_market_mobile/features/auth/domain/enums/role.dart';
 class User {
   final int userId;
   final String username;
+  final String lastName;
   final String firstName;
   final String? middleName;
-  final String lastName;
   final String email;
+  final DateTime dateOfBirth;
+  final String mobileNumber;
+  final String address;
   final Role role;
   final AccountStatus status;
+  final String? profileUrl;
   final DateTime createdAt;
   final bool mustChangePassword;
 
-  const User({
+  User({
     required this.userId,
     required this.username,
-    required this.firstName,
-    this.middleName,
     required this.lastName,
+    required this.firstName,
+    required this.middleName,
     required this.email,
+    required this.dateOfBirth,
+    required this.mobileNumber,
+    required this.address,
     required this.role,
     required this.status,
+    required this.profileUrl,
     required this.createdAt,
-    required this.mustChangePassword
+    required this.mustChangePassword,
   });
 }

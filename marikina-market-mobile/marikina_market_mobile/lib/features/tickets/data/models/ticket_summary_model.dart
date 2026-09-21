@@ -1,5 +1,5 @@
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_summary.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 
 class TicketSummaryModel {
   final int ticketId;
@@ -13,7 +13,6 @@ class TicketSummaryModel {
   final DateTime issuedAt;
   final DateTime updatedAt;
   final DateTime overDueDate;
-  final bool isOverDue;
 
   const TicketSummaryModel({
     required this.ticketId,
@@ -27,7 +26,6 @@ class TicketSummaryModel {
     required this.issuedAt,
     required this.updatedAt,
     required this.overDueDate,
-    required this.isOverDue
   });
 
   factory TicketSummaryModel.fromJson(Map<String, dynamic> json) {
@@ -35,15 +33,14 @@ class TicketSummaryModel {
       ticketId: json['id'] as int,
       enforcerId: json['enforcer_id'] as int,
       vendorId: json['vendor_id'] as int,
-      controlNumber: json['control_number'] as String, 
-      ticketStatus: TicketStatus.fromValue(json['status'] as String), 
-      businessName: json['business_name'] as String, 
-      stallNumber: json['stall_number'], 
-      marketSection: json['market_section_name'], 
-      issuedAt: DateTime.parse(json['issued_at'] as String), 
+      controlNumber: json['control_number'] as String,
+      ticketStatus: TicketStatus.fromValue(json['status'] as String),
+      businessName: json['business_name'] as String,
+      stallNumber: json['stall_number'],
+      marketSection: json['market_section_name'],
+      issuedAt: DateTime.parse(json['issued_at'] as String),
       updatedAt: DateTime.parse(json['updated_at']),
-      overDueDate: DateTime.parse(json['overdue_date'] as String), 
-      isOverDue: json['is_overdue'] as bool
+      overDueDate: DateTime.parse(json['overdue_date'] as String),
     );
   }
 
@@ -52,15 +49,14 @@ class TicketSummaryModel {
       ticketId: ticketId,
       enforcerId: enforcerId,
       vendorId: vendorId,
-      controlNumber: controlNumber, 
-      ticketStatus: ticketStatus, 
-      businessName: businessName, 
-      stallNumber: stallNumber, 
-      marketSection: marketSection, 
-      issuedAt: issuedAt, 
+      controlNumber: controlNumber,
+      ticketStatus: ticketStatus,
+      businessName: businessName,
+      stallNumber: stallNumber,
+      marketSection: marketSection,
+      issuedAt: issuedAt,
       updatedAt: updatedAt,
-      overDueDate: overDueDate, 
-      isOverDue: isOverDue
+      overDueDate: overDueDate,
     );
   }
 }

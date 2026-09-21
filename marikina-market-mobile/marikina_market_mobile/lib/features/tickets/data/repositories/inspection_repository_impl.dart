@@ -8,7 +8,7 @@ import 'package:marikina_market_mobile/features/tickets/data/models/params/save_
 import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/entities/page_result.dart';
+import 'package:marikina_market_mobile/core/shared/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/vendor_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
@@ -17,17 +17,22 @@ import 'package:marikina_market_mobile/features/tickets/domain/repositories/insp
 class InspectionRepositoryImpl implements InspectionRepository {
   final InspectionRemoteDataSource remoteDataSource;
   final InspectionLocalDataSource localDataSource;
-  InspectionRepositoryImpl(
-    this.remoteDataSource,
-    this.localDataSource
-  );
+  InspectionRepositoryImpl(this.remoteDataSource, this.localDataSource);
 
   @override
-  Future<Result<PageResult<InspectionTicketSummary>>> loadInspections(int offset, ViolationType type) async {
+  Future<Result<PageResult<InspectionTicketSummary>>> loadInspections(
+    int offset,
+    ViolationType type,
+  ) async {
     try {
-      final inspectionModels = await remoteDataSource.loadInspections(offset, type);
+      final inspectionModels = await remoteDataSource.loadInspections(
+        offset,
+        type,
+      );
 
       return Result.success(inspectionModels.toEntity((m) => m.toEntity()));
+    } on ValidationException catch (e) {
+      return Result.failure(ValidationFailure(e.message));
     } on UnauthorizedException catch (e) {
       return Result.failure(UnauthorizedFailure(e.message));
     } on NetworkException catch (e) {
@@ -41,7 +46,9 @@ class InspectionRepositoryImpl implements InspectionRepository {
   Future<Result<List<Ordinance>>> loadCacheOrdinances() async {
     try {
       final ordinanceModels = await localDataSource.getCacheOrdinances();
-      return Result.success(ordinanceModels.map((model) => model.toEntity()).toList());
+      return Result.success(
+        ordinanceModels.map((model) => model.toEntity()).toList(),
+      );
     } on CacheException catch (e) {
       return Result.failure(CacheFailure(e.message));
     }
@@ -51,11 +58,18 @@ class InspectionRepositoryImpl implements InspectionRepository {
   Future<Result<List<Ordinance>>> loadOrdinances() async {
     try {
       final localOrdinanceModels = await localDataSource.getCacheOrdinances();
-      if (localOrdinanceModels.isNotEmpty) return Result.success(localOrdinanceModels.map((model) => model.toEntity()).toList());
+      if (localOrdinanceModels.isNotEmpty)
+        return Result.success(
+          localOrdinanceModels.map((model) => model.toEntity()).toList(),
+        );
 
       final ordinanceModels = await remoteDataSource.getOrdinances();
-      await localDataSource.saveOrdinances(ordinanceModels.map(OrdinanceHiveModel.fromModel).toList());
-      return Result.success(ordinanceModels.map((model) => model.toEntity()).toList());
+      await localDataSource.saveOrdinances(
+        ordinanceModels.map(OrdinanceHiveModel.fromModel).toList(),
+      );
+      return Result.success(
+        ordinanceModels.map((model) => model.toEntity()).toList(),
+      );
     } on CacheException catch (e) {
       return Result.failure(CacheFailure(e.message));
     } on NetworkException catch (e) {
@@ -81,11 +95,15 @@ class InspectionRepositoryImpl implements InspectionRepository {
   }
 
   @override
-  Future<Result<List<VendorSummary>>> getVendorByStall(String stallNumber) async {
+  Future<Result<List<VendorSummary>>> getVendorByStall(
+    String stallNumber,
+  ) async {
     try {
       final vendorModels = await remoteDataSource.getVendorByStall(stallNumber);
 
-      return Result.success(vendorModels.map((model) => model.toEntity()).toList());
+      return Result.success(
+        vendorModels.map((model) => model.toEntity()).toList(),
+      );
     } on ValidationException catch (e) {
       return Result.failure(ValidationFailure(e.message));
     } on NetworkException catch (e) {
@@ -96,9 +114,15 @@ class InspectionRepositoryImpl implements InspectionRepository {
   }
 
   @override
-  Future<Result<FineSummary>> getTicketFineSummary(List<int> ordinanceIds, int vendorId) async {
+  Future<Result<FineSummary>> getTicketFineSummary(
+    List<int> ordinanceIds,
+    int vendorId,
+  ) async {
     try {
-      final fineModels = await remoteDataSource.getFineSummary(ordinanceIds, vendorId);
+      final fineModels = await remoteDataSource.getFineSummary(
+        ordinanceIds,
+        vendorId,
+      );
 
       return Result.success(fineModels.toEntity());
     } on ValidationException catch (e) {
@@ -112,14 +136,21 @@ class InspectionRepositoryImpl implements InspectionRepository {
 
   @override
   Future<Result<SaveInspectionResult>> saveNewInspection(
-    SaveInspectionParams params
+    SaveInspectionParams params,
   ) async {
     try {
       final resultModel = await remoteDataSource.saveInspection(params);
 
       return Result.success(resultModel.toEntity());
     } on ConflictException catch (e) {
-      return Result.failure(ConflictFailure(e.droppedOrdinances.map((model) => model.toEntity()).toList(), e.message));
+      return Result.failure(
+        ConflictFailure(
+          e.droppedOrdinances.map((model) => model.toEntity()).toList(),
+          e.message,
+        ),
+      );
+    } on DuplicateWarningException catch (e) {
+      return Result.failure(DuplicateWarningFailure(e.message));
     } on UnauthorizedException catch (e) {
       return Result.failure(UnauthorizedFailure(e.message));
     } on ValidationException catch (e) {

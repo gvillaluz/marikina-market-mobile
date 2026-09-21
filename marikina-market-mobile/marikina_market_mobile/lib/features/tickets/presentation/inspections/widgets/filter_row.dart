@@ -9,7 +9,7 @@ class FilterRow extends StatefulWidget {
   const FilterRow({
     super.key,
     required this.typeSelected,
-    required this.onChange
+    required this.onChange,
   });
 
   @override
@@ -30,51 +30,25 @@ class _FilterRowState extends State<FilterRow> {
               final isSelected = widget.typeSelected == entry;
 
               return ChoiceChip(
-                label: Text(entry.value), 
+                label: Text(entry.value),
                 selected: isSelected,
-                
+
                 labelStyle: TextStyle(
-                  color: isSelected ? AppColors.primaryLight : AppColors.primaryBlack
+                  color: isSelected
+                      ? AppColors.primaryLight
+                      : AppColors.primaryBlack,
                 ),
 
                 selectedColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 showCheckmark: false,
 
-                onSelected: (_) => widget.onChange(entry)
+                onSelected: (_) => widget.onChange(entry),
               );
-            }).toList()
+            }).toList(),
           ),
-          // Wrap(
-          //   spacing: 5,
-          //   children: SyncStatusFilter.values.asMap().entries.map((entry) {
-          //     final isSelected = entry.key + 1 == ticketStatusSelected;
-
-          //     return ChoiceChip(
-          //       label: Text(entry.value.value), 
-          //       selected: isSelected,
-
-          //       labelStyle: TextStyle(
-          //         color: isSelected ? AppColors.primaryLight : AppColors.primaryBlack
-          //       ),
-
-          //       selectedColor: AppColors.primary,
-          //       checkmarkColor: Colors.white,
-          //       shape: RoundedRectangleBorder(
-          //         borderRadius: BorderRadius.circular(20)
-          //       ),
-          //       showCheckmark: false,
-
-          //       onSelected: (bool selected) {
-          //         setState(() {
-          //           ticketStatusSelected = entry.key + 1;
-          //         });
-          //       },
-          //     );
-          //   }).toList(),
-          // )
         ],
       ),
     );

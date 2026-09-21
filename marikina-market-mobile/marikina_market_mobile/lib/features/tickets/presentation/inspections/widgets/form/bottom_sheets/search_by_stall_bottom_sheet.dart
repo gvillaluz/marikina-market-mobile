@@ -19,8 +19,8 @@ class SearchByStallBottomSheet extends StatefulWidget {
 
 class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
   Timer? _debouncer;
-
   int? selectedVendor;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -48,11 +48,9 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
     return BlocListener<InspectionBloc, InspectionState>(
       listener:(context, state) {
         if (state is InspectionSearchError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.error)
-            )
-          );
+          setState(() {
+            _errorMessage = state.error;
+          });
         }
       },
       child: Padding(
@@ -86,6 +84,17 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                     ),
                   ),
                   const SizedBox(height: 10,),
+
+                  if (_errorMessage != null) ...[
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        color: AppColors.primaryRed
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10,)
+                  ],
         
                   const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,10 +34,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 class AddNewInspectionPage extends StatefulWidget {
   final User user;
 
-  const AddNewInspectionPage({
-    required this.user,
-    super.key
-  });
+  const AddNewInspectionPage({required this.user, super.key});
 
   @override
   State<StatefulWidget> createState() => _AddNewInspectionPageState();
@@ -44,12 +43,8 @@ class AddNewInspectionPage extends StatefulWidget {
 class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _stallNumberController = TextEditingController();
-  final TextEditingController _tradeNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _middleNameController = TextEditingController();
-  final TextEditingController _ticketDescriptionController = TextEditingController();
+  final TextEditingController _ticketDescriptionController =
+      TextEditingController();
   final TextEditingController _communityHrsController = TextEditingController();
 
   String? _photoError;
@@ -90,9 +85,27 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     });
   }
 
+  void _onDeleteFineSummary(int index) {
+    final isTicket = _selectedType == ViolationType.ticket;
+    if (_selectedOrdinances.isEmpty || index >= _selectedOrdinances.length)
+      return;
+
+    setState(() {
+      final removedOrdinance = _selectedOrdinances[index];
+      _selectedOrdinances.removeAt(index);
+
+      if (isTicket && _fineSummary != null) {
+        _fineSummary!.breakdownItems.removeWhere(
+          (item) => item.ordinanceId == removedOrdinance.id,
+        );
+      }
+    });
+  }
+
   bool get _isFormEmpty {
     final isTicket = _selectedType == ViolationType.ticket;
-    final hasVendorOrOrdinances = _vendorSummary != null || _selectedOrdinances.isNotEmpty;
+    final hasVendorOrOrdinances =
+        _vendorSummary != null || _selectedOrdinances.isNotEmpty;
     final hasEvidences = isTicket && _capturedEvidences.isNotEmpty;
     return !hasVendorOrOrdinances && !hasEvidences;
   }
@@ -102,26 +115,16 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
       context: context,
       builder: (context) => AlertDialog.adaptive(
         actionsAlignment: MainAxisAlignment.center,
-        titlePadding: const EdgeInsets.only(
-          bottom: 0,
-        ),
+        titlePadding: const EdgeInsets.only(bottom: 0),
         contentPadding: const EdgeInsets.only(
           top: 7,
           left: 20,
           right: 20,
-          bottom: 10
+          bottom: 10,
         ),
 
-        icon: Icon(
-          Icons.info_outline,
-          size: 50,
-          color: AppColors.primaryRed,
-          
-        ),
-        title: const Text(
-          'Discard Inspection?',
-          textAlign: TextAlign.center,
-        ),
+        icon: Icon(Icons.info_outline, size: 50, color: AppColors.primaryRed),
+        title: const Text('Discard Inspection?', textAlign: TextAlign.center),
         content: const Text(
           'Your changes will be lost if you leave this page.',
           textAlign: TextAlign.center,
@@ -137,7 +140,9 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
               ),
               Expanded(
                 child: TextButton(
-                  style: TextButton.styleFrom(foregroundColor: AppColors.primaryRed),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primaryRed,
+                  ),
                   onPressed: () => Navigator.pop(context, true),
                   child: const Text('Discard'),
                 ),
@@ -147,7 +152,7 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
         ],
       ),
     );
-    
+
     return confirmed == true;
   }
 
@@ -159,48 +164,52 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
           content: Text(
             'Please fill out vendor\'s information first.',
             style: TextStyle(color: AppColors.primaryLight),
-          )
+          ),
         ),
       );
       return;
     }
-    
+
     final fineSummary = await showModalBottomSheet(
-      context: context, 
+      context: context,
       enableDrag: true,
       showDragHandle: true,
       isScrollControlled: true,
       builder: (context) => BlocProvider(
         create: (_) => sl<InspectionBloc>(),
         child: SelectOrdinanceBottomSheet(
-          isWarningTicket: _selectedType == ViolationType.warning ? true : false,
+          isWarningTicket: _selectedType == ViolationType.warning
+              ? true
+              : false,
           ordinances: _selectedOrdinances,
           onChanged: _onChangeOrdinance,
           vendorId: _vendorSummary?.id,
         ),
-      )
+      ),
     );
 
     if (fineSummary != null) {
       bool hasDuplicate = false;
       List<FineBreakdownItem> duplicateOrdinances = [];
-      
+
       setState(() {
         _fineSummary = fineSummary;
 
         final duplicatedSummaryIds = _fineSummary?.breakdownItems
-          .where((f) => f.isDuplicate == true)
-          .map((f) => f.ordinanceId)
-          .toSet();
+            .where((f) => f.isDuplicate == true)
+            .map((f) => f.ordinanceId)
+            .toSet();
 
         if (duplicatedSummaryIds != null && duplicatedSummaryIds.isNotEmpty) {
           hasDuplicate = true;
 
           duplicateOrdinances = _fineSummary!.breakdownItems
-            .where((f) => f.isDuplicate == true)
-            .toList();
+              .where((f) => f.isDuplicate == true)
+              .toList();
 
-          _selectedOrdinances.removeWhere((o) => duplicatedSummaryIds.contains(o.id));
+          _selectedOrdinances.removeWhere(
+            (o) => duplicatedSummaryIds.contains(o.id),
+          );
           _fineSummary!.breakdownItems.removeWhere((o) => o.isDuplicate);
         }
       });
@@ -216,25 +225,23 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
             ),
             content: const Text(
               'Removed: Vendor already has an open ticket for this ordinance.',
-              style: TextStyle(
-                color: AppColors.secondaryYellow
-              ),
-            ), 
+              style: TextStyle(color: AppColors.secondaryYellow),
+            ),
             actions: [
               TextButton(
                 onPressed: () => showAdaptiveDialog(
-                  context: context, 
-                  builder: (_) => DuplicateWarningDialog(duplicateOrdinances: duplicateOrdinances)
+                  context: context,
+                  builder: (_) => DuplicateWarningDialog(
+                    duplicateOrdinances: duplicateOrdinances,
+                  ),
                 ),
                 child: const Text(
                   'SHOW',
-                  style: TextStyle(
-                    color: AppColors.secondaryYellow
-                  ),
-                )
-              )
-            ]
-          )
+                  style: TextStyle(color: AppColors.secondaryYellow),
+                ),
+              ),
+            ],
+          ),
         );
       }
     }
@@ -245,19 +252,17 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     setState(() => _photoError = null);
   });
 
-  void removeEvidence(int index) => setState(() => _capturedEvidences.removeAt(index));
+  void removeEvidence(int index) =>
+      setState(() => _capturedEvidences.removeAt(index));
 
   void _populateVendorInfo(VendorSummary vendor) {
     setState(() {
       _vendorError = null;
       _vendorSummary = vendor;
-      _stallNumberController.text = vendor.stallNumber;
-      _tradeNameController.text = vendor.tradeName;
-      _lastNameController.text = vendor.lastName;
-      _firstNameController.text = vendor.firstName;
-      _middleNameController.text = vendor.middleName;
 
-      _selectedType = vendor.canIssueWarning ? _selectedType : ViolationType.ticket;
+      _selectedType = vendor.canIssueWarning
+          ? _selectedType
+          : ViolationType.ticket;
     });
   }
 
@@ -271,8 +276,7 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     final isTextValid = _formKey.currentState?.validate() ?? false;
 
     setState(() {
-      _vendorError = (_vendorSummary == null &&
-              _stallNumberController.text.trim().isEmpty)
+      _vendorError = _vendorSummary == null
           ? 'Please select a registered vendor or enter stall info.'
           : null;
 
@@ -316,18 +320,19 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     }
 
     context.pushNamed(
-      Routes.newInspectionPreviewName, 
+      Routes.newInspectionPreviewName,
       extra: InspectionFormData(
         enforcerId: widget.user.userId,
-        vendorSummary: _vendorSummary!, 
+        vendorSummary: _vendorSummary!,
         fineSummary: _fineSummary,
-        ordinances: _selectedOrdinances, 
-        evidences: _capturedEvidences, 
-        description: _ticketDescriptionController.text.trim(), 
-        ticketType: _selectedType, 
+        ordinances: _selectedOrdinances,
+        evidences: _capturedEvidences,
+        description: _ticketDescriptionController.text.trim(),
+        ticketType: _selectedType,
         penaltyType: _selectedPenaltyType,
-        communityServiceHrs: communityHrs
-      ));
+        communityServiceHrs: communityHrs,
+      ),
+    );
   }
 
   @override
@@ -339,6 +344,7 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _confirmDiscard(context) && context.mounted) {
+          ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
           Navigator.of(context).pop();
         }
       },
@@ -348,7 +354,7 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
             'New Inspection',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primary
+              color: AppColors.primary,
             ),
           ),
         ),
@@ -360,41 +366,25 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Column(
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   children: [
-                  //     _buildRowLabel('DATE:', DateTimeFormatter.getDate(DateTime.now())),
-                  //     const SizedBox(height: 5,),
-                  //     _buildRowLabel('MARKET ENFORCER:', '${widget.user.firstName} ${widget.user.lastName}'),
-                  //   ],
-                  // ),
-            
-                  // const SizedBox(height: 20,),
-            
                   if (_vendorSummary == null) ...[
                     ViolatorInfoCard(
-                      // stallNumberController: _stallNumberController,
-                      // tradeNameController: _tradeNameController,
-                      // lastNameController: _lastNameController,
-                      // firstNameController: _firstNameController,
-                      // middleNameController: _middleNameController,
                       onVendorSelected: _populateVendorInfo,
-                      errorMessage: _vendorError
+                      errorMessage: _vendorError,
                     ),
+                    const SizedBox(height: 20),
                   ],
-            
-                  const SizedBox(height: 20,),
 
                   if (_vendorSummary != null) ...[
                     VendorSummaryBanner(
                       vendor: _vendorSummary!,
-                      onChangeVendor: () => setState(() => _vendorSummary = null),
+                      onChangeVendor: () =>
+                          setState(() => _vendorSummary = null),
                     ),
 
-                    const SizedBox(height: 20,),
+                    const SizedBox(height: 20),
 
                     InspectionTypeToggle(
-                      selected: _selectedType, 
+                      selected: _selectedType,
                       onChange: (type) => setState(() {
                         _selectedType = type;
                         _selectedOrdinances = [];
@@ -405,18 +395,21 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
                       }),
                       isEnabled: _vendorSummary!.canIssueWarning,
                     ),
-              
-                    const SizedBox(height: 20,),
+
+                    const SizedBox(height: 20),
 
                     if (!_vendorSummary!.canIssueWarning) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 15,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.tertiaryYellow.withValues(alpha: .50),
+                          color: AppColors.tertiaryYellow.withValues(
+                            alpha: .50,
+                          ),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: AppColors.primaryYellow
-                          )
+                          border: Border.all(color: AppColors.primaryYellow),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,54 +433,56 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
                                     ),
                                     softWrap: true,
                                   ),
-                                  
-                                  if (_vendorSummary?.activeWarningIssuedAt != null) ...[
+
+                                  if (_vendorSummary?.activeWarningIssuedAt !=
+                                      null) ...[
                                     Text(
-                                    DateTimeFormatter.getDateTime(_vendorSummary!.activeWarningIssuedAt!),
-                                      style: TextStyle(
-                                        color: AppColors.mediumGrey
+                                      DateTimeFormatter.getDateTime(
+                                        _vendorSummary!.activeWarningIssuedAt!,
                                       ),
-                                    )
-                                  ]
+                                      style: TextStyle(
+                                        color: AppColors.mediumGrey,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
-                            )
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
 
                     const SizedBox(height: 20),
-              
+
                     TicketViolationCard(
                       onPressed: _handleOrdinanceSelect,
+                      onDelete: _onDeleteFineSummary,
                       ordinances: _selectedOrdinances,
                       capturedPhotos: _capturedEvidences,
                       fineSummary: _fineSummary,
                       isTicket: isTicket,
-                      errorMessage: _ordinanceError
+                      errorMessage: _ordinanceError,
                     ),
-              
-                    if (_fineSummary != null && 
+
+                    if (_fineSummary != null &&
                         _fineSummary!.breakdownItems.isNotEmpty &&
-                        isTicket && 
+                        isTicket &&
                         _selectedOrdinances.isNotEmpty) ...[
                       PaymentTypeSection(
                         selectedPenaltyType: _selectedPenaltyType,
-                        severity: _fineSummary?.severity ?? Severity.low,
-                        totalFineAmount: _fineSummary?.totalPaymentAmount ?? 0.0, 
+                        severity: _fineSummary?.severity ?? Severity.minor,
+                        totalFineAmount:
+                            _fineSummary?.totalPaymentAmount ?? 0.0,
                         onChangeType: _onChangePenaltyType,
                         communityHrsController: _communityHrsController,
                         communityHrsError: _communityHrsError,
-
                       ),
-                      const SizedBox(height: 20,),
+                      const SizedBox(height: 20),
                     ],
-              
-                    const Text(
-                      'DESCRIPTION'
-                    ),
-                    const SizedBox(height: 5,),
+
+                    const Text('DESCRIPTION'),
+                    const SizedBox(height: 5),
                     TextFormField(
                       controller: _ticketDescriptionController,
                       maxLines: 5,
@@ -507,26 +502,24 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
                         border: const OutlineInputBorder(),
                       ),
                     ),
-              
+
                     if (isTicket) ...[
-                      const SizedBox(height: 20,),
-                      const Text(
-                        'PHOTO EVIDENCE'
-                      ),
-                      const SizedBox(height: 5,),
-              
+                      const SizedBox(height: 20),
+                      const Text('PHOTO EVIDENCE'),
+                      const SizedBox(height: 5),
+
                       AddPhotoEvidenceBtn(
-                          photos: _capturedEvidences,
-                          onPhotoAdded: (photo) => addEvidence(photo),
-                          onPhotoRemoved: (index) => removeEvidence(index),
-                          isInvalid: _photoError != null,
-                        ),
-              
+                        photos: _capturedEvidences,
+                        onPhotoAdded: (photo) => addEvidence(photo),
+                        onPhotoRemoved: (index) => removeEvidence(index),
+                        isInvalid: _photoError != null,
+                      ),
+
                       if (_photoError != null) ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const SizedBox(width: 15,),
+                            const SizedBox(width: 15),
                             Text(
                               _photoError!,
                               style: const TextStyle(
@@ -539,69 +532,48 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
                       ],
                     ],
 
-                    const SizedBox(height: 30,),
-            
+                    const SizedBox(height: 30),
+
                     AppPrimaryButton(
-                      label: 'Submit ${isTicket ? 'Ticket': 'Warning'}', 
-                      iconData: Icons.gavel, 
-                      onPressed: _submit
+                      label: 'Submit ${isTicket ? 'Ticket' : 'Warning'}',
+                      iconData: Icons.gavel,
+                      onPressed: _submit,
                     ),
-              
-                    const SizedBox(height: 10,),
-              
+
+                    const SizedBox(height: 10),
+
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primaryRed,
-                          backgroundColor: AppColors.secondaryRed.withValues(alpha: .30),
+                          backgroundColor: AppColors.secondaryRed.withValues(
+                            alpha: .30,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          side: BorderSide(
-                            color: AppColors.primaryRed
-                          ),
+                          side: BorderSide(color: AppColors.primaryRed),
                           padding: const EdgeInsets.symmetric(vertical: 15),
                         ),
                         onPressed: () async {
                           if (_isFormEmpty) {
                             Navigator.of(context).pop();
-                          } else if (await _confirmDiscard(context) && context.mounted) {
+                          } else if (await _confirmDiscard(context) &&
+                              context.mounted) {
                             Navigator.of(context).pop();
                           }
-                        }, 
-                        child: const Text('Cancel')
+                        },
+                        child: const Text('Cancel'),
                       ),
-                    )
+                    ),
                   ],
                 ],
               ),
             ),
-          )
+          ),
         ),
       ),
     );
   }
-
-  // Row _buildRowLabel(String label, String value) {
-  //   return Row(
-  //     spacing: 5,
-  //     children: [
-  //       Text(
-  //         label,
-  //         style: TextStyle(
-  //           fontSize: 15,
-  //           color: AppColors.lightGrey
-  //         ),
-  //       ),
-  //       Text(
-  //         value,
-  //         style: const TextStyle(
-  //           fontWeight: FontWeight.bold,
-  //           fontSize: 15
-  //         ),
-  //       )
-  //     ],
-  //   );
-  // }
 }

@@ -11,9 +11,10 @@ abstract class AuthRemoteDataSource {
     int userId,
     String currentPassword,
     String newPassword,
-    String confirmNewPassword
+    String confirmNewPassword,
   );
   Future<AuthTokens> refreshAuthTokens(String refreshToken);
+  Future<void> registerDeviceToken(String deviceToken);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -25,17 +26,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await apiClient.post(
         '/auth/login-mobile',
-        data: {
-          'username': username,
-          'password': password
-        }
+        data: {'username': username, 'password': password},
       );
 
       return AuthTokens.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) throw UnauthorizedException(e.response?.data['message'] ?? 'Invalid username or password.');
+      if (e.response?.statusCode == 400) {
+        throw UnauthorizedException(
+          e.response?.data['message'] ?? 'Invalid username or password.',
+        );
+      }
 
-      if (e.response?.statusCode == 423) throw UnauthorizedException(e.response?.data['message'] ?? 'Too many attempts. Please try again later.');
+      if (e.response?.statusCode == 423) {
+        throw UnauthorizedException(
+          e.response?.data['message'] ??
+              'Too many attempts. Please try again later.',
+        );
+      }
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.connectionError ||
@@ -50,11 +57,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> getUser() async {
     try {
-      final response = await apiClient.post('/auth/me');
+      final response = await apiClient.post('/user/me');
 
       return UserModel.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) throw UnauthorizedException(e.response?.data['message'] ?? 'Invalid username or password.');
+      if (e.response?.statusCode == 400) {
+        throw UnauthorizedException(
+          e.response?.data['message'] ?? 'Invalid username or password.',
+        );
+      }
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.connectionError ||
@@ -65,9 +76,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException('Something went wrong. Please try again later');
     }
   }
-  
+
   @override
-  Future<void> changePassword(int userId, String currentPassword, String newPassword, String confirmNewPassword) async {
+  Future<void> changePassword(
+    int userId,
+    String currentPassword,
+    String newPassword,
+    String confirmNewPassword,
+  ) async {
     try {
       await apiClient.post(
         '/auth/mandatory-change-password',
@@ -75,14 +91,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'user_id': userId,
           'current_password': currentPassword,
           'new_password': newPassword,
-          'confirm_new_password': confirmNewPassword
-        }
+          'confirm_new_password': confirmNewPassword,
+        },
       );
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) throw TokenExpiredException("Invalid Session.");
+      if (e.response?.statusCode == 401) {
+        throw TokenExpiredException("Invalid Session.");
+      }
 
       if (e.response?.statusCode == 400) {
-        throw UnauthorizedException(e.response?.data['message'] ?? 'Invalid current or new password.');
+        throw UnauthorizedException(
+          e.response?.data['message'] ?? 'Invalid current or new password.',
+        );
       }
 
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -94,22 +114,42 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw ServerException('Something went wrong. Please try again later');
     }
   }
-  
+
   @override
   Future<AuthTokens> refreshAuthTokens(String refreshToken) async {
     try {
       final response = await apiClient.post(
         '/auth/refresh',
-        data: {
-          'refresh_token': refreshToken
-        },
-        options: Options(extra: {'skipAuth': true})
+        data: {'refresh_token': refreshToken},
+        options: Options(extra: {'skipAuth': true}),
       );
 
       return AuthTokens.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) throw UnauthorizedException(e.response?.data['message'] ?? 'Session expired.');
+      if (e.response?.statusCode == 401) {
+        throw UnauthorizedException(
+          e.response?.data['message'] ?? 'Session expired.',
+        );
+      }
 
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('No internet connection. Please try again.');
+      }
+
+      throw ServerException('Something went wrong. Please try again later');
+    }
+  }
+
+  @override
+  Future<void> registerDeviceToken(String deviceToken) async {
+    try {
+      await apiClient.post(
+        '/user/device-token',
+        data: {'device_token': deviceToken},
+      );
+    } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.receiveTimeout) {

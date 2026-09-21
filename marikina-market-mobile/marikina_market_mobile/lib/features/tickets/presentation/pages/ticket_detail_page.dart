@@ -19,58 +19,65 @@ class TicketDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.goNamed(Routes.inspectionsName);
-            }
-          },
-        ),
-        title: const Text(
-          'Inspections',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        context.goNamed(Routes.inspectionsName);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.goNamed(Routes.inspectionsName);
+              }
+            },
+          ),
+          title: const Text(
+            'Inspections',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: BlocConsumer<TicketBloc, TicketState>(
-            listener: (context, state) {
-              if (state is TicketError) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message))
-                );
-              }
-            },
-            builder: (context, state) {
-              if (state is TicketDetailLoading) {
-                return SkeletonBox(height: 500,);
-              }
-
-              if (state is TicketDetailLoaded) {
-                return TicketDetailContent(
-                  ticket: state.ticket,
-                  droppedOrdinances: droppedOrdinances,
-                );
-              }
-
-              if (state is TicketError) {
-                
-              }
-
-              return SizedBox.shrink();
-            },
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: BlocConsumer<TicketBloc, TicketState>(
+              listener: (context, state) {
+                if (state is TicketError) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message))
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is TicketDetailLoading) {
+                  return SkeletonBox(height: 500,);
+                }
+      
+                if (state is TicketDetailLoaded) {
+                  return TicketDetailContent(
+                    ticket: state.ticket,
+                    droppedOrdinances: droppedOrdinances,
+                  );
+                }
+      
+                if (state is TicketError) {
+                  
+                }
+      
+                return SizedBox.shrink();
+              },
+            )
           )
-        )
+        ),
       ),
     );
   }

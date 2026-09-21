@@ -10,13 +10,13 @@ class AddPhotoEvidenceBtn extends StatefulWidget {
   final ValueChanged<XFile> onPhotoAdded;
   final ValueChanged<int> onPhotoRemoved;
   final bool isInvalid;
-  
+
   const AddPhotoEvidenceBtn({
     required this.photos,
     required this.onPhotoAdded,
     required this.onPhotoRemoved,
     required this.isInvalid,
-    super.key
+    super.key,
   });
 
   @override
@@ -28,7 +28,7 @@ class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
     final photo = await ImagePicker().pickImage(
       source: ImageSource.camera,
       imageQuality: 100,
-      preferredCameraDevice: CameraDevice.rear
+      preferredCameraDevice: CameraDevice.rear,
     );
 
     if (photo == null) return;
@@ -52,32 +52,29 @@ class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
               color: AppColors.primaryLight,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: widget.isInvalid ? AppColors.primaryRed : AppColors.lightGrey,
-                width: 1
-              )
+                color: widget.isInvalid
+                    ? AppColors.primaryRed
+                    : AppColors.lightGrey,
+                width: 1,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.add_a_photo_outlined,
-                  size: 30,
-                ),
-                const SizedBox(height: 10,),
-                const Text(
+                Icon(Icons.add_a_photo_outlined, size: isPhotosEmpty ? 30 : 20),
+                const SizedBox(height: 10),
+                Text(
                   'Tap to take a photo',
-                  style: TextStyle(
-                    fontSize: 15
-                  ),
-                )
+                  style: TextStyle(fontSize: isPhotosEmpty ? 15 : 12),
+                ),
               ],
             ),
           ),
         ),
 
         if (!isPhotosEmpty) ...[
-          const SizedBox(height: 15,),
+          const SizedBox(height: 15),
 
           GridView.builder(
             shrinkWrap: true,
@@ -94,12 +91,16 @@ class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
               return GestureDetector(
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder:(context) => EvidenceGalleryScreen(
-                    imageProviders: widget.photos.map((e) => FileImage(File(e.path))).toList(),
-                    initialIndex: index,
-                    isEditing: true,
-                    onDelete: widget.onPhotoRemoved,
-                  ))
+                  MaterialPageRoute(
+                    builder: (context) => EvidenceGalleryScreen(
+                      imageProviders: widget.photos
+                          .map((e) => FileImage(File(e.path)))
+                          .toList(),
+                      initialIndex: index,
+                      isEditing: true,
+                      onDelete: widget.onPhotoRemoved,
+                    ),
+                  ),
                 ),
                 child: Stack(
                   children: [
@@ -119,23 +120,22 @@ class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
                       top: 6,
                       right: 6,
                       child: GestureDetector(
-                        onTap: () =>  widget.onPhotoRemoved(index),
+                        onTap: () => widget.onPhotoRemoved(index),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: AppColors.primaryLight,
                             shape: BoxShape.circle,
                             boxShadow: [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 3,
-                              ),
+                              BoxShadow(color: Colors.black26, blurRadius: 3),
                             ],
                           ),
                           child: Icon(
                             Icons.close,
                             size: 16,
-                            color: AppColors.primaryBlack.withValues(alpha: .70),
+                            color: AppColors.primaryBlack.withValues(
+                              alpha: .70,
+                            ),
                           ),
                         ),
                       ),
@@ -145,7 +145,7 @@ class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
               );
             },
           ),
-        ]
+        ],
       ],
     );
   }

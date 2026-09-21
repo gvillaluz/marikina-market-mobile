@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/features/layout/presentation/widgets/root_navigation_bar.dart';
 
 class RootScreen extends StatelessWidget {
@@ -11,19 +12,19 @@ class RootScreen extends StatelessWidget {
     'Dashboard',
     'Inspections',
     'Tickets',
-    'Profile'
+    'Profile',
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: navigationShell,
       bottomNavigationBar: RootNavigationBar(navigationShell: navigationShell),
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       leadingWidth: 55,
       leading: Padding(
@@ -41,20 +42,16 @@ class RootScreen extends StatelessWidget {
         style: TextStyle(
           color: AppColors.primary,
           fontWeight: FontWeight.bold,
-          letterSpacing: .7
+          letterSpacing: .7,
         ),
       ),
 
       actions: [
         IconButton(
-          onPressed: () {}, 
-          icon: Icon(
-            Icons.notifications_outlined,
-            size: 30,
-            color: AppColors.primary,
-          )
+          onPressed: () => context.pushNamed(Routes.notificationsName),
+          icon: Icon(Icons.notifications, size: 30, color: AppColors.primary),
         ),
-        const SizedBox(width: 10,)
+        const SizedBox(width: 10),
       ],
     );
   }

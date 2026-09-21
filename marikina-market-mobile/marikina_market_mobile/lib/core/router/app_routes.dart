@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/di/dependency_injection.dart';
@@ -13,6 +12,9 @@ import 'package:marikina_market_mobile/features/dashboard/presentation/bloc/dash
 import 'package:marikina_market_mobile/features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'package:marikina_market_mobile/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:marikina_market_mobile/features/layout/presentation/pages/root_screen.dart';
+import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_event.dart';
+import 'package:marikina_market_mobile/features/notification/presentation/pages/notification_page.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/pages/change_password_page.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/pages/edit_profile_page.dart';
@@ -20,7 +22,7 @@ import 'package:marikina_market_mobile/features/profile/presentation/pages/profi
 import 'package:marikina_market_mobile/features/splash/presentation/pages/splash_screen.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_form_data.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
@@ -42,10 +44,7 @@ final appRoutes = [
       transitionDuration: const Duration(milliseconds: 300),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: child,
         );
       },
@@ -60,10 +59,7 @@ final appRoutes = [
       transitionDuration: const Duration(milliseconds: 300),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: child,
         );
       },
@@ -76,10 +72,8 @@ final appRoutes = [
       key: state.pageKey,
       child: const SplashScreen(),
       transitionDuration: const Duration(milliseconds: 250),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(opacity: animation, child: child),
     ),
   ),
   GoRoute(
@@ -94,32 +88,30 @@ final appRoutes = [
     },
     pageBuilder: (context, state) {
       final ticketId = int.tryParse(state.pathParameters['ticketId'] ?? '');
-      final droppedOrdinances = state.extra != null 
-        ? (state.extra as List).cast<DuplicateOrdinance>() 
-        : null;
-    
+      final droppedOrdinances = state.extra != null
+          ? (state.extra as List).cast<DuplicateOrdinance>()
+          : null;
+
       return CupertinoPage(
         key: state.pageKey,
         child: BlocProvider(
           create: (_) => sl<TicketBloc>()..add(LoadTicketDetail(ticketId!)),
-          child: TicketDetailPage(
-            droppedOrdinances: droppedOrdinances,
-          ),
-        )
+          child: TicketDetailPage(droppedOrdinances: droppedOrdinances),
+        ),
       );
-    }
+    },
   ),
   GoRoute(
     name: Routes.editProfileName,
     path: Routes.editProfile,
-    pageBuilder:(context, state) {
+    pageBuilder: (context, state) {
       final user = state.extra as User;
 
       return CupertinoPage(
         child: BlocProvider(
           create: (_) => sl<ProfileBloc>(),
-          child: EditProfilePage(user: user,),
-        )
+          child: EditProfilePage(user: user),
+        ),
       );
     },
   ),
@@ -128,12 +120,12 @@ final appRoutes = [
     path: Routes.changePassword,
     pageBuilder: (context, state) {
       final user = state.extra as User;
-      
+
       return CupertinoPage(
         child: BlocProvider(
           create: (_) => sl<ProfileBloc>(),
           child: ChangePasswordPage(user: user),
-        )
+        ),
       );
     },
   ),
@@ -149,7 +141,7 @@ final appRoutes = [
         child: BlocProvider(
           create: (_) => sl<InspectionBloc>(),
           child: AddNewInspectionPage(user: user),
-        )
+        ),
       );
     },
     routes: [
@@ -163,17 +155,31 @@ final appRoutes = [
             child: BlocProvider(
               create: (_) => sl<InspectionBloc>(),
               child: NewInspectionPreviewPage(formData: formData),
-            )
+            ),
           );
         },
-      )
-    ] 
+      ),
+    ],
+  ),
+  GoRoute(
+    name: Routes.notificationsName,
+    path: Routes.notifications,
+    pageBuilder: (context, state) {
+      return CupertinoPage(
+        child: BlocProvider(
+          create: (_) =>
+              sl<NotificationBloc>()..add(LoadNotifications(0, 'All')),
+          child: const NotificationPage(),
+        ),
+      );
+    },
   ),
   StatefulShellRoute(
-    builder:(context, state, navigationShell) => RootScreen(navigationShell: navigationShell),
+    builder: (context, state, navigationShell) =>
+        RootScreen(navigationShell: navigationShell),
 
     navigatorContainerBuilder: (context, navigationShell, children) {
-      final int currentIndex = navigationShell.currentIndex; 
+      final int currentIndex = navigationShell.currentIndex;
 
       return Stack(
         children: List.generate(children.length, (index) {
@@ -190,22 +196,19 @@ final appRoutes = [
           }
 
           return AnimatedSlide(
-            offset: slideOffset, 
+            offset: slideOffset,
             duration: const Duration(milliseconds: 300),
             curve: Curves.decelerate,
             child: Offstage(
               offstage: !isCurrent,
-              child: TickerMode(
-                enabled: isCurrent, 
-                child: children[index]
-              ),
+              child: TickerMode(enabled: isCurrent, child: children[index]),
             ),
           );
         }),
       );
     },
-    branches: _shellBranches
-  )
+    branches: _shellBranches,
+  ),
 ];
 
 final _shellBranches = [
@@ -220,8 +223,8 @@ final _shellBranches = [
             child: const DashboardPage(),
           );
         },
-      )
-    ]
+      ),
+    ],
   ),
   StatefulShellBranch(
     routes: [
@@ -230,12 +233,14 @@ final _shellBranches = [
         path: Routes.inspetions,
         builder: (context, state) {
           return BlocProvider(
-            create: (_) => sl<InspectionBloc>()..add(LoadInspectionTickets(0, ViolationType.warning)),
+            create: (_) =>
+                sl<InspectionBloc>()
+                  ..add(LoadInspectionTickets(0, ViolationType.warning)),
             child: const InspectionsPage(),
           );
         },
-      )
-    ]
+      ),
+    ],
   ),
   StatefulShellBranch(
     routes: [
@@ -244,20 +249,26 @@ final _shellBranches = [
         path: Routes.tickets,
         builder: (context, state) {
           return BlocProvider(
-            create: (_) => sl<TicketBloc>()..add(LoadTicketSummary(offset: 0, status: TicketStatus.active)),
+            create: (_) => sl<TicketBloc>()
+              ..add(LoadTicketSummary(offset: 0, status: TicketStatus.pending)),
             child: const TicketsPage(),
           );
-        }
-      )
-    ]
+        },
+      ),
+    ],
   ),
   StatefulShellBranch(
     routes: [
       GoRoute(
         name: Routes.profileName,
         path: Routes.profile,
-        builder:(context, state) => const ProfilePage(),
-      )
-    ]
+        builder: (context, state) {
+          return BlocProvider(
+            create: (_) => sl<ProfileBloc>(),
+            child: const ProfilePage(),
+          );
+        },
+      ),
+    ],
   ),
 ];

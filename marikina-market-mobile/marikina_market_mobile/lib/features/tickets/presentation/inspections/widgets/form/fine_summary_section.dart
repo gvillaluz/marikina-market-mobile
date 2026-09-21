@@ -10,11 +10,13 @@ class FineSummarySection extends StatelessWidget {
   final List<Ordinance> items;
   final FineSummary? fineSummary;
   final bool isTicket;
+  final ValueChanged<int> onDelete;
 
   const FineSummarySection({
     required this.items,
     required this.fineSummary,
     required this.isTicket,
+    required this.onDelete,
     super.key
   });
 
@@ -76,24 +78,12 @@ class FineSummarySection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    spacing: 10,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          ordinance.ordinanceNo,
-                          style: TextStyle(
-                            fontSize: 15,
-                          ),
-                          softWrap: true,
-                        ),
-                      ),
-                      Icon(
-                        Icons.close
-                      )
-                    ],
+                  Text(
+                    ordinance.ordinanceNo,
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                    softWrap: true,
                   ),
         
                   Text(

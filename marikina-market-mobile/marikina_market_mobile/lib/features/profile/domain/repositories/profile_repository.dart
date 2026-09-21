@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:marikina_market_mobile/core/errors/result.dart';
 import 'package:marikina_market_mobile/core/utils/unit.dart';
 import 'package:marikina_market_mobile/features/auth/domain/entities/user.dart';
@@ -14,6 +15,9 @@ abstract class ProfileRepository {
     int userId,
     String currentPassword,
     String newPassword,
-    String confirmNewPassword
+    String confirmNewPassword,
   );
+
+  Future<Result<User>> changePhoto(XFile file);
+  Future<Result<User>> removePhoto();
 }

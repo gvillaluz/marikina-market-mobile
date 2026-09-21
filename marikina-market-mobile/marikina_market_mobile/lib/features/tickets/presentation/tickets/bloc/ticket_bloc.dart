@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:marikina_market_mobile/core/errors/result.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/entities/page_result.dart';
+import 'package:marikina_market_mobile/core/shared/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ticket_detail_use_case.dart';
@@ -17,13 +17,16 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
 
   TicketBloc({
     required this.loadTicketListUseCase,
-    required this.loadTicketDetailUseCase
+    required this.loadTicketDetailUseCase,
   }) : super(TicketInitial()) {
-    on<LoadTicketSummary>(_onLoadTicketSummary); 
+    on<LoadTicketSummary>(_onLoadTicketSummary);
     on<LoadTicketDetail>(_onLoadTicketDetail);
   }
 
-  Future<void> _onLoadTicketSummary(LoadTicketSummary event, Emitter<TicketState> emit) async {
+  Future<void> _onLoadTicketSummary(
+    LoadTicketSummary event,
+    Emitter<TicketState> emit,
+  ) async {
     emit(TicketLoading());
 
     final result = await loadTicketListUseCase(event.offset, event.status);
@@ -31,8 +34,8 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     switch (result) {
       case Success<PageResult<TicketSummary>>():
         _ticketList = event.offset == 0
-          ? result.data.tickets
-          : [..._ticketList, ...result.data.tickets];
+            ? result.data.items
+            : [..._ticketList, ...result.data.items];
         emit(TicketsLoaded(_ticketList, result.data.hasMore));
 
       case ResultFailure():
@@ -46,10 +49,10 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     final result = await loadTicketDetailUseCase(event.ticketId);
 
     switch (result) {
-      case ResultFailure<TicketDetail>(: final failure):
+      case ResultFailure<TicketDetail>(:final failure):
         emit(TicketError(failure.message));
 
-      case Success<TicketDetail>(: final data):
+      case Success<TicketDetail>(:final data):
         emit(TicketDetailLoaded(data));
     }
   }

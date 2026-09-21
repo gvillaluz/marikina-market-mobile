@@ -1,4 +1,4 @@
-import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 
 abstract class TicketEvent {}
 

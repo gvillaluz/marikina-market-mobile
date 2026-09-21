@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/bloc/profile_state.dart';
@@ -154,7 +153,7 @@ class ChangePasswordCard extends StatelessWidget {
 
           const SizedBox(height: 20,),
 
-          BackBtn(onPressed: () => context.pop())
+          const BackBtn()
         ],
       ),
     );

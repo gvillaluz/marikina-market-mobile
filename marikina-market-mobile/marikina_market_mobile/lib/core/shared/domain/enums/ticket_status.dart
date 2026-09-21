@@ -1,8 +1,10 @@
 enum TicketStatus {
-  active('Active'),
+  pending('Pending'),
   paid('Paid'),
-  voidType('Void'),
-  disputed('Disputed');
+  waived('Waived'),
+  contested('Contested'),
+  overdue('Overdue'),
+  cleared('Cleared');
 
   final String value;
   const TicketStatus(this.value);

@@ -1,4 +1,4 @@
-import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 
 class TicketSummary {
   final int ticketId;
@@ -12,7 +12,6 @@ class TicketSummary {
   final DateTime issuedAt;
   final DateTime updatedAt;
   final DateTime overDueDate;
-  final bool isOverDue;
 
   const TicketSummary({
     required this.ticketId,
@@ -26,6 +25,5 @@ class TicketSummary {
     required this.issuedAt,
     required this.updatedAt,
     required this.overDueDate,
-    required this.isOverDue
   });
 }

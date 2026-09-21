@@ -13,5 +13,6 @@ abstract class AuthRepository {
     String confirmNewPassword
   );
   Future<Result<Unit>> refreshTokens();
+  Future<Result<Unit>> registerDeviceToken();
   Future<Result<Unit>> logoutUser();
 }

@@ -19,7 +19,7 @@ class FormTypeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isSelected = selectedType == formType;
-    bool isWarningBlocked = formType == ViolationType.warning && isEnabled == false;
+    bool isWarningBlocked = isEnabled == false;
     bool canSelect = !isWarningBlocked;
 
     return GestureDetector(
@@ -45,7 +45,7 @@ class FormTypeOption extends StatelessWidget {
           spacing: 5,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (isWarningBlocked) ...[
+            if (isWarningBlocked && formType == ViolationType.warning) ...[
               Icon(
                 Icons.warning,
                 color: AppColors.lightGrey.withValues(alpha: .50),

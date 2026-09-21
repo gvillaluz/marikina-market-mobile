@@ -10,7 +10,7 @@ class TicketDetailEvidenceSection extends StatelessWidget {
   const TicketDetailEvidenceSection({
     required this.evidences,
     required this.isTicket,
-    super.key
+    super.key,
   });
 
   @override
@@ -26,8 +26,8 @@ class TicketDetailEvidenceSection extends StatelessWidget {
             offset: const Offset(-1, 1),
             blurRadius: 3.5,
             spreadRadius: 0,
-          )
-        ]
+          ),
+        ],
       ),
       child: GridView.builder(
         shrinkWrap: true,
@@ -41,33 +41,34 @@ class TicketDetailEvidenceSection extends StatelessWidget {
         itemCount: evidences.length,
         itemBuilder: (context, index) {
           final photoUrl = evidences[index];
-          
+
           return GestureDetector(
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder:(context) => EvidenceGalleryScreen(
-                imageProviders: evidences.map((e) => CachedNetworkImageProvider('https://192.168.1.57:5001/$e')).toList(),
-                initialIndex: index,
-                isEditing: false,
-              ))
+              MaterialPageRoute(
+                builder: (context) => EvidenceGalleryScreen(
+                  imageProviders: evidences
+                      .map((e) => CachedNetworkImageProvider(e))
+                      .toList(),
+                  initialIndex: index,
+                  isEditing: false,
+                ),
+              ),
             ),
             child: Positioned.fill(
               child: Hero(
-                tag: CachedNetworkImageProvider('https://192.168.1.57:5001/$photoUrl'), 
+                tag: CachedNetworkImageProvider(photoUrl),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: CachedNetworkImage(
-                    imageUrl: 'https://192.168.1.57:5001/$photoUrl',
+                    imageUrl: photoUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator()
-                    ),
-                    errorWidget: (context, url, error) => const Icon(
-                      Icons.broken_image, 
-                      color: Colors.red,
-                    ),
-                  )
-                )
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.broken_image, color: Colors.red),
+                  ),
+                ),
               ),
             ),
           );

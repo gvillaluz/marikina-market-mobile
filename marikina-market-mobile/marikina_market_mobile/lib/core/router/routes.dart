@@ -34,4 +34,7 @@ abstract class Routes {
 
   static const changePassword = '/edit/password';
   static const changePasswordName = 'changePassword';
+
+  static const notifications = '/notifications';
+  static const notificationsName = 'notifications';
 }

@@ -1,6 +1,6 @@
 enum Severity implements Comparable<Severity> {
-  low("Low"),
-  medium("Medium"),
+  minor("Minor"),
+  moderate("Moderate"),
   high("High");
 
   final String value;

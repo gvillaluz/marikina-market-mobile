@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/widgets.dart';
 import 'package:marikina_market_mobile/core/errors/exceptions.dart';
 import 'package:marikina_market_mobile/core/errors/failure.dart';
 import 'package:marikina_market_mobile/core/errors/result.dart';
@@ -14,7 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   const AuthRepositoryImpl({
     required this.remoteDataSource,
-    required this.localDataSource
+    required this.localDataSource,
   });
 
   @override
@@ -22,7 +24,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final authTokens = await localDataSource.getTokens();
 
-      final sessionRecoverable = authTokens.refreshTokenExpiration.isAfter(DateTime.now());
+      final sessionRecoverable = authTokens.refreshTokenExpiration.isAfter(
+        DateTime.now(),
+      );
       if (!sessionRecoverable) return Result.success(null);
 
       final userModel = await localDataSource.getUser();
@@ -32,7 +36,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.failure(CacheFailure(e.message));
     }
   }
-  
+
   @override
   Future<Result<User>> loginUser(String username, String password) async {
     try {
@@ -54,7 +58,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.failure(ServerFailure(e.message));
     }
   }
-  
+
   @override
   Future<Result<Unit>> storeUserInfo(User user) async {
     try {
@@ -64,7 +68,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.failure(CacheFailure(e.message));
     }
   }
-  
+
   @override
   Future<Result<Unit>> logoutUser() async {
     try {
@@ -74,25 +78,39 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.failure(CacheFailure(e.message));
     }
   }
-  
+
   @override
-  Future<Result<User>> mandatoryChangePassword(int userId, String currentPassword, String newPassword, String confirmNewPassword) async {
+  Future<Result<User>> mandatoryChangePassword(
+    int userId,
+    String currentPassword,
+    String newPassword,
+    String confirmNewPassword,
+  ) async {
     try {
-      await remoteDataSource.changePassword(userId, currentPassword, newPassword, confirmNewPassword);
+      await remoteDataSource.changePassword(
+        userId,
+        currentPassword,
+        newPassword,
+        confirmNewPassword,
+      );
 
       final user = await localDataSource.getUser();
-      
+
       final newUser = UserModel(
-        userId: user.userId, 
-        username: user.username, 
-        firstName: user.firstName, 
-        lastName: user.lastName, 
+        userId: user.userId,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         middleName: user.middleName,
-        email: user.email, 
-        role: user.role, 
-        status: user.status, 
-        createdAt: user.createdAt, 
-        mustChangePassword: false
+        email: user.email,
+        dateOfBirth: user.dateOfBirth,
+        mobileNumber: user.mobileNumber,
+        address: user.address,
+        role: user.role,
+        status: user.status,
+        profileUrl: user.profileUrl,
+        createdAt: user.createdAt,
+        mustChangePassword: false,
       );
 
       await localDataSource.storeUser(newUser);
@@ -110,12 +128,14 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.failure(ServerFailure(e.message));
     }
   }
-  
+
   @override
   Future<Result<Unit>> refreshTokens() async {
     try {
       final tokens = await localDataSource.getTokens();
-      final freshTokens = await remoteDataSource.refreshAuthTokens(tokens.refreshToken);
+      final freshTokens = await remoteDataSource.refreshAuthTokens(
+        tokens.refreshToken,
+      );
       await localDataSource.storeTokens(freshTokens);
 
       return Result.success(unit);
@@ -127,6 +147,42 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.failure(NetworkFailure(e.message));
     } on ServerException catch (e) {
       return Result.failure(ServerFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Result<Unit>> registerDeviceToken() async {
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus != AuthorizationStatus.authorized &&
+          settings.authorizationStatus != AuthorizationStatus.provisional) {
+        return Result.failure(
+          ValidationFailure("Push notification permission denied."),
+        );
+      }
+
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) {
+        return Result.failure(
+          ServerFailure("Unable to retrieve device token."),
+        );
+      }
+
+      debugPrint(token);
+
+      await remoteDataSource.registerDeviceToken(token);
+      return Result.success(unit);
+    } on NetworkException catch (e) {
+      return Result.failure(NetworkFailure(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message));
+    } catch (e) {
+      return Result.failure(ServerFailure("Failed to register device token."));
     }
   }
 }

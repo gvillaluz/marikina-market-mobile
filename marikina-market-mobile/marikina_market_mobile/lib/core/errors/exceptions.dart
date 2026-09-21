@@ -45,6 +45,11 @@ class ConflictException implements Exception {
   );
 }
 
+class DuplicateWarningException implements Exception {
+  final String message;
+  DuplicateWarningException(this.message);
+}
+
 class NotFoundException implements Exception {
   final String message;
   NotFoundException(this.message);

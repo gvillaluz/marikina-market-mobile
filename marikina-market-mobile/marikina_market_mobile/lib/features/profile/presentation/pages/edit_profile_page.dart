@@ -14,10 +14,7 @@ import 'package:marikina_market_mobile/features/profile/presentation/widgets/edi
 class EditProfilePage extends StatefulWidget {
   final User user;
 
-  const EditProfilePage({
-    super.key,
-    required this.user
-  });
+  const EditProfilePage({super.key, required this.user});
 
   @override
   State<StatefulWidget> createState() => _EditProfilePageState();
@@ -45,12 +42,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void onSaveChanges() {
-    context.read<ProfileBloc>().add(EditProfileSubmitted(
-      userId: widget.user.userId, 
-      lastName: _lastNameController.text, 
-      firstName: _firstNameController.text,
-      middleName: _middleNameController.text
-    ));
+    context.read<ProfileBloc>().add(
+      EditProfileSubmitted(
+        userId: widget.user.userId,
+        lastName: _lastNameController.text,
+        firstName: _firstNameController.text,
+        middleName: _middleNameController.text,
+      ),
+    );
   }
 
   @override
@@ -63,27 +62,27 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: BlocListener<ProfileBloc, ProfileState>(
-            listener:(context, state) {
+            listener: (context, state) {
               if (state is EditProfileError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
                     backgroundColor: AppColors.primaryRed,
-                  )
+                  ),
                 );
               }
 
               if (state is ProfileUpdated) {
                 context.read<AuthBloc>().add(UserUpdated(state.user));
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Account information updated successfully!'),
                     backgroundColor: AppColors.primary,
                     duration: Duration(seconds: 2),
-                  )
+                  ),
                 );
-                
+
                 context.pop();
               }
             },
@@ -97,21 +96,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 18,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20,),
+                  const SizedBox(height: 20),
                   EditProfileCard(
-                    lastNameController: _lastNameController, 
-                    firstNameController: _firstNameController, 
+                    lastNameController: _lastNameController,
+                    firstNameController: _firstNameController,
                     middleNameController: _middleNameController,
                     onSaveChanges: onSaveChanges,
-                  )
+                  ),
                 ],
               ),
             ),
-          )
-        )
+          ),
+        ),
       ),
     );
   }

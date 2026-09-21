@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_state.dart';
@@ -17,7 +17,7 @@ class TicketsPage extends StatefulWidget {
 class _TicketsPageState extends State<TicketsPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
-  TicketStatus _selectedStatus = TicketStatus.active;
+  TicketStatus _selectedStatus = TicketStatus.pending;
 
   @override
   void initState() {
@@ -82,6 +82,7 @@ class _TicketsPageState extends State<TicketsPage> {
           },
           child: CustomScrollView(
             controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.all(20),

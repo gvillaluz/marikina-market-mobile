@@ -8,6 +8,7 @@ import 'package:marikina_market_mobile/features/tickets/presentation/inspections
 
 class TicketViolationCard extends StatelessWidget {
   final ValueChanged<BuildContext> onPressed;
+  final ValueChanged<int> onDelete;
   final List<Ordinance> ordinances;
   final List<XFile> capturedPhotos;
   final FineSummary? fineSummary;
@@ -17,6 +18,7 @@ class TicketViolationCard extends StatelessWidget {
   const TicketViolationCard({
     super.key,
     required this.onPressed,
+    required this.onDelete,
     required this.ordinances,
     required this.capturedPhotos,
     required this.fineSummary,
@@ -47,8 +49,12 @@ class TicketViolationCard extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           child: AppPrimaryButton(
-            label: 'Select Ordinance', 
-            iconData: Icons.add_circle, 
+            label: ordinances.isEmpty 
+              ? 'Select Ordinance'
+              : 'Edit Selection', 
+            iconData: ordinances.isEmpty 
+              ? Icons.add_circle
+              : Icons.edit_note, 
             onPressed: () => onPressed(context)
           ),
         ),
@@ -75,7 +81,8 @@ class TicketViolationCard extends StatelessWidget {
           FineSummarySection(
             items: ordinances,
             fineSummary: fineSummary,
-            isTicket: isTicket
+            isTicket: isTicket,
+            onDelete: onDelete,
           ),
           const SizedBox(height: 20,),
         ],

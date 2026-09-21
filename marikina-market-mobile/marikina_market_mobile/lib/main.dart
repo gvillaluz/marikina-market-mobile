@@ -1,16 +1,20 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:marikina_market_mobile/core/connectivity/cubit/connectivity_cubit.dart';
 import 'package:marikina_market_mobile/core/di/dependency_injection.dart';
+import 'package:marikina_market_mobile/core/notification/notification_listener_service.dart';
 import 'package:marikina_market_mobile/core/router/app_router.dart';
 import 'package:marikina_market_mobile/core/theme/app_theme.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/ordinance_hive_model.dart';
+import 'package:marikina_market_mobile/firebase_options.dart';
 
 class DevHttpOverrides extends HttpOverrides {
   @override
@@ -22,9 +26,20 @@ class DevHttpOverrides extends HttpOverrides {
   }
 }
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+}
+
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform
+  );
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   if (kDebugMode) {
     HttpOverrides.global = DevHttpOverrides();
@@ -36,9 +51,15 @@ void main() async {
 
   await init(ordinanceBox);
 
+  sl<NotificationListenerService>().init();
+
   FlutterNativeSplash.remove();
 
   runApp(const MyApp());
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    sl<NotificationListenerService>().handleInitialMessage();
+  });
 }
 
 class MyApp extends StatelessWidget {

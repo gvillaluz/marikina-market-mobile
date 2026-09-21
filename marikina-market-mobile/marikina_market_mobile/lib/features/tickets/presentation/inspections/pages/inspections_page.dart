@@ -79,6 +79,7 @@ class _InspectionPageState extends State<InspectionsPage> {
           },
           child: CustomScrollView(
             controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.all(20),

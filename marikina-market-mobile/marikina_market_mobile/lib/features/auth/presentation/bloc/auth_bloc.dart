@@ -11,6 +11,7 @@ import 'package:marikina_market_mobile/features/auth/domain/use_cases/login_user
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/logout_user_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/mandatory_change_password_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/refresh_tokens_use_case.dart';
+import 'package:marikina_market_mobile/features/auth/domain/use_cases/register_device_token_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_state.dart';
 
@@ -21,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUserUseCase logoutUserUseCase;
   final MandatoryChangePasswordUseCase mandatoryChangePasswordUseCase;
   final RefreshTokensUseCase refreshTokensUseCase;
+  final RegisterDeviceTokenUseCase registerDeviceTokenUseCase;
 
   // ignore: unused_field
   late final StreamSubscription<ConnectivityStatus> _connectivitySubscription;
@@ -33,7 +35,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.loginUserUseCase,
     required this.logoutUserUseCase,
     required this.mandatoryChangePasswordUseCase,
-    required this.refreshTokensUseCase
+    required this.refreshTokensUseCase,
+    required this.registerDeviceTokenUseCase
   }) : super(AuthInitial()) {
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<LoginSubmitted>(_onLoginSubmitted);
@@ -99,18 +102,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             ValidationFailure(: final message)):
         emit(AuthInvalidCredentials(message));
 
-      case ResultFailure(failure: NetworkFailure(: final message) ||
-            ServerFailure(: final message) ||
-            CacheFailure(: final message) ||
-            ConflictFailure(: final message)): 
-        emit(AuthConnectionError(message));
-
       case ResultFailure(failure: TokenValidationFailure(: final message)):
         debugPrint(message);
         emit(Unauthenticated(false));
 
+      case ResultFailure(failure: NetworkFailure(: final message) ||
+          ServerFailure(: final message) ||
+          CacheFailure(: final message) ||
+          ConflictFailure(: final message) ||
+          DuplicateWarningFailure(: final message)): 
+        emit(AuthConnectionError(message));
+
       case Success(data: final user):
         emit(Authenticated(user: user));
+        unawaited(registerDeviceTokenUseCase());
     }
   }
 

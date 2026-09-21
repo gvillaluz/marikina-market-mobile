@@ -1,10 +1,11 @@
 enum PenaltyType {
-  cashFine("CashFine"),
-  bloodDonation("BloodDonation"),
-  communityService("CommunityService");
+  cashFine("CashFine", 'Cash Fine'),
+  bloodDonation("BloodDonation", 'Blood Donation'),
+  communityService("CommunityService", 'Community Service');
 
   final String value;
-  const PenaltyType(this.value);
+  final String label;
+  const PenaltyType(this.value, this.label);
 
   static PenaltyType fromValue(String value) {
     return PenaltyType.values.firstWhere(

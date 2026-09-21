@@ -14,11 +14,16 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   @override
   Future<DashboardSummaryModel> getDashboardSummary() async {
     try {
-      final response = await apiClient.get('/ticket/enforcer/dashboard');
+      final response = await apiClient.get('/enforcer/tickets/dashboard');
 
       return DashboardSummaryModel.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) throw UnauthorizedException(e.response?.data['message'] ?? 'Something went wrong. Please try to re-login.');
+      if (e.response?.statusCode == 401) {
+        throw UnauthorizedException(
+          e.response?.data['message'] ??
+              'Something went wrong. Please try to re-login.',
+        );
+      }
 
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.connectionError ||

@@ -7,10 +7,12 @@ import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/core/shared/presentation/widgets/app_primary_btn.dart';
 import 'package:marikina_market_mobile/core/utils/date_formatter_util.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_form_data.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_state.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/dialogs/duplicate_warning_conflict_dialog.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/preview/duplicate_ticket_dialog.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/preview/penalty_details_section.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/preview/photo_evidence_preview_section.dart';
@@ -21,10 +23,7 @@ import 'package:marikina_market_mobile/features/tickets/presentation/inspections
 
 class NewInspectionPreviewPage extends StatefulWidget {
   final InspectionFormData formData;
-  const NewInspectionPreviewPage({
-    required this.formData,
-    super.key
-  });
+  const NewInspectionPreviewPage({required this.formData, super.key});
 
   @override
   State<StatefulWidget> createState() => _NewInspectionPreviewPageState();
@@ -32,7 +31,9 @@ class NewInspectionPreviewPage extends StatefulWidget {
 
 class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
   void _submit(BuildContext context) {
-    final categories = widget.formData.ordinances.map((o) => o.category).toList();
+    final categories = widget.formData.ordinances
+        .map((o) => o.category)
+        .toList();
 
     context.read<InspectionBloc>().add(
       NewInspectionSubmitted(
@@ -45,7 +46,9 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
         penaltyType: widget.formData.penaltyType!,
         communityServiceHours: widget.formData.communityServiceHrs,
         primaryCategory: categories,
-        evidences: widget.formData.ticketType == ViolationType.ticket ? widget.formData.evidences : null,
+        evidences: widget.formData.ticketType == ViolationType.ticket
+            ? widget.formData.evidences
+            : null,
       ),
     );
   }
@@ -68,20 +71,24 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
           'New Inspection',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.primary
+            color: AppColors.primary,
           ),
         ),
       ),
       body: BlocListener<InspectionBloc, InspectionState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is SubmitNewTicketLoading) {
             showDialog(
-              context: context, 
+              context: context,
               barrierDismissible: false,
               builder: (context) => PopScope(
                 canPop: false,
-                child: ProcessLoadingOverlay(message: isTicket ? 'Please wait while we issue and record your violation ticket.' : 'Please wait while we issue and record your warning ticket.'),
-              )
+                child: ProcessLoadingOverlay(
+                  message: isTicket
+                      ? 'Please wait while we issue and record your violation ticket.'
+                      : 'Please wait while we issue and record your warning ticket.',
+                ),
+              ),
             );
           }
 
@@ -92,39 +99,73 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
             }
           }
 
+          void showSnackbar(String message) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: AppColors.primaryRed,
+              ),
+            );
+          }
+
           if (state is SubmitNewTicketSuccess) {
             disposeDialog();
             final result = state.result;
 
             context.goNamed(
               Routes.ticketDetailName,
-              pathParameters: {'ticketId': result.inspectionSummary.ticketId.toString()},
-              extra: result.duplicateOrdinances
+              pathParameters: {
+                'ticketId': result.inspectionSummary.ticketId.toString(),
+              },
+              extra: result.duplicateOrdinances,
             );
           }
 
           if (state is DuplicationConflictInspection) {
             disposeDialog();
 
-            debugPrint(state.duplicateOrdinances.toString());
+            if (!context.mounted) return;
+
             showDialog(
-              context: context, 
+              context: context,
               builder: (_) => DuplicateTicketDialog(
-                message: state.message, 
-                duplicateOrdinances: state.duplicateOrdinances, 
+                message: state.message,
+                duplicateOrdinances: state.duplicateOrdinances,
                 onEditOrdinances: () {
                   context.pop();
-                }
-              )
+                },
+              ),
             );
           }
 
+          if (state is DuplicateWarningConflict) {
+            disposeDialog();
+
+            final result = await showDialog<bool>(
+              context: context,
+              builder: (_) =>
+                  DuplicateWarningConflictDialog(message: state.message),
+            );
+
+            if (result == true && context.mounted) {
+              context.pop();
+            }
+          }
+
           if (state is InspectionSubmitConnectionError) {
-            Navigator.pop(context);
+            disposeDialog();
+            showSnackbar(state.message);
+            if (context.mounted) {
+              context.pop();
+            }
           }
 
           if (state is InspectionSubmitError) {
-            Navigator.pop(context);
+            disposeDialog();
+            showSnackbar(state.message);
+            if (context.mounted) {
+              context.pop();
+            }
           }
         },
         child: SafeArea(
@@ -135,22 +176,22 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
               children: [
                 Text(
                   isTicket
-                    ? 'Ticket Issuance Preview'
-                    : 'Written Warning Preview',
+                      ? 'Ticket Issuance Preview'
+                      : 'Written Warning Preview',
                   style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 20,
-                    fontWeight: FontWeight.bold
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   isTicket
-                  ? 'Please review the details below before issuing the violation ticket'
-                  : 'Please review the details below before issuing the warning.',
+                      ? 'Please review the details below before issuing the violation ticket'
+                      : 'Please review the details below before issuing the warning.',
                 ),
-        
-                const SizedBox(height: 20,),
-        
+
+                const SizedBox(height: 20),
+
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
@@ -161,8 +202,8 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                         offset: const Offset(-1, 1),
                         blurRadius: 3.5,
                         spreadRadius: 0,
-                      )
-                    ]
+                      ),
+                    ],
                   ),
                   padding: const EdgeInsets.only(top: 20, bottom: 20),
                   child: Column(
@@ -176,15 +217,13 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 18,
-                                fontWeight: FontWeight.bold
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
-                              'Marikina Public Market Office',
-                            ),
-        
-                            const SizedBox(height: 20,),
-        
+                            const Text('Marikina Public Market Office'),
+
+                            const SizedBox(height: 20),
+
                             Row(
                               spacing: 5,
                               children: [
@@ -195,17 +234,17 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                                 ),
                                 Text(
                                   isTicket
-                                    ? 'VIOLATION TICKET'
-                                    : 'WRITTEN WARNING',
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold
-                                    ),
+                                      ? 'VIOLATION TICKET'
+                                      : 'WRITTEN WARNING',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-        
+
                                 const Spacer(),
-                                
+
                                 if (isTicket) ...[
                                   const Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -214,7 +253,7 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                                         'CONTROL NO.',
                                         style: TextStyle(
                                           color: AppColors.mediumGrey,
-                                          fontSize: 12
+                                          fontSize: 12,
                                         ),
                                       ),
                                       Text(
@@ -222,9 +261,9 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                                         style: TextStyle(
                                           color: AppColors.primaryRed,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16
+                                          fontSize: 16,
                                         ),
-                                      )
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -233,134 +272,140 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                           ],
                         ),
                       ),
-        
-                      const SizedBox(height: 20,),
+
+                      const SizedBox(height: 20),
                       const DottedLine(
                         dashLength: 5,
                         dashColor: AppColors.lightGrey,
                       ),
-                      const SizedBox(height: 20,),
-        
+                      const SizedBox(height: 20),
+
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: ViolatorInfoSection(
                           vendor: widget.formData.vendorSummary,
-                          isTicket: isTicket
+                          isTicket: isTicket,
                         ),
                       ),
-        
-                      const SizedBox(height: 20,),
+
+                      const SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: const Divider(),
                       ),
-                      const SizedBox(height: 20,),
-        
+                      const SizedBox(height: 20),
+
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: ViolationDetailsSection(
                           fine: widget.formData.fineSummary,
-                          ordinances: widget.formData.ordinances, 
+                          ordinances: widget.formData.ordinances,
                           isTicket: isTicket,
-                          marketSection: widget.formData.vendorSummary.marketSectionName, 
+                          marketSection:
+                              widget.formData.vendorSummary.marketSectionName,
                           description: widget.formData.description,
                         ),
                       ),
-        
-                      if (fineSummary != null && penaltyType != null && isTicket) ...[
-                        const SizedBox(height: 20,),
+
+                      if (fineSummary != null &&
+                          penaltyType != null &&
+                          isTicket) ...[
+                        const SizedBox(height: 20),
                         const Padding(
                           padding: EdgeInsets.only(left: 20, right: 20),
                           child: Divider(),
                         ),
-                        const SizedBox(height: 20,),
-        
+                        const SizedBox(height: 20),
+
                         Padding(
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           child: PenaltyDetailsSection(
-                            severity: highest!, 
-                            penaltyType: penaltyType, 
+                            severity: highest!,
+                            penaltyType: penaltyType,
                             totalFineAmount: fineSummary.totalPaymentAmount,
                             communityHrs: widget.formData.communityServiceHrs,
                           ),
-                        )
+                        ),
                       ],
-        
-                      const SizedBox(height: 20,),
+
+                      const SizedBox(height: 20),
                       const DottedLine(
                         dashLength: 5,
                         dashColor: AppColors.lightGrey,
                       ),
-                      const SizedBox(height: 20,),
-        
+                      const SizedBox(height: 20),
+
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 10,
                           children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Divider(),
-                                    const Text('Issued By:'),
-                                    const Text(
-                                      'Market Officer',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold
-                                      ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(),
+                                  const Text('Issued By:'),
+                                  const Text(
+                                    'Market Officer',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    Text('Marikina City Public Market')
-                                  ],
-                                )
+                                  ),
+                                  Text('Marikina City Public Market'),
+                                ],
                               ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Divider(),
-                                    const Text('Issued To:'),
-                                    const Text(
-                                      'Market Vendor',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold
-                                      ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(),
+                                  const Text('Issued To:'),
+                                  const Text(
+                                    'Market Vendor',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    Text(
-                                      'Date: ${DateTimeFormatter.getDate(DateTime.now())}'
-                                    )
-                                  ],
-                                )
-                              )
+                                  ),
+                                  Text(
+                                    'Date: ${DateTimeFormatter.getDate(DateTime.now())}',
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
-                      )
-                    ]
-                  )
+                      ),
+                    ],
+                  ),
                 ),
 
                 if (isTicket) ...[
-                  const SizedBox(height: 20,),
+                  const SizedBox(height: 20),
 
                   const Text(
                     'Photo Evidence Record',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 20,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const Text(
-                    'The image below serves as the photo evidence attached to this violation ticket.'
+                    'The image below serves as the photo evidence attached to this violation ticket.',
                   ),
 
-                  const SizedBox(height: 10,),
-                  
+                  const SizedBox(height: 10),
+
                   if (widget.formData.evidences == null) ...[
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 32,
+                        horizontal: 24,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primaryLight,
                         border: Border.all(
@@ -387,64 +432,81 @@ class _NewInspectionPreviewPageState extends State<NewInspectionPreviewPage> {
                           const SizedBox(height: 12),
                           const Text(
                             'No Photo Evidences Found',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           const Text(
                             'There are no captured or recorded photo evidences for this ticket.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: AppColors.mediumGrey, height: 1.4),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.mediumGrey,
+                              height: 1.4,
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ] else ...[
-                    PhotoEvidencePreviewSection(evidences: widget.formData.evidences!)
-                  ]
+                    PhotoEvidencePreviewSection(
+                      evidences: widget.formData.evidences!,
+                    ),
+                  ],
                 ],
-        
-                const SizedBox(height: 20,),
-        
+
+                const SizedBox(height: 20),
+
                 AppPrimaryButton(
-                  label: 'Submit ${isTicket ? 'Ticket' : 'Warning'}', 
-                  iconData: Icons.gavel, 
+                  label: 'Submit ${isTicket ? 'Ticket' : 'Warning'}',
+                  iconData: Icons.gavel,
                   onPressed: () async {
                     await showModalBottomSheet(
-                      context: context, 
+                      context: context,
                       enableDrag: true,
                       showDragHandle: true,
                       isScrollControlled: true,
                       builder: (_) => SubmitConfirmationBottomSheet(
-                        onPressed: () => _submit(context), 
-                        fineSummary: widget.formData.fineSummary, 
-                        penaltyType: widget.formData.penaltyType, 
-                        severity: highest, 
-                        isTicket: isTicket
-                      )
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _submit(context);
+                        },
+                        fineSummary: widget.formData.fineSummary,
+                        penaltyType: widget.formData.penaltyType,
+                        communityServiceHrs:
+                            widget.formData.penaltyType ==
+                                PenaltyType.communityService
+                            ? widget.formData.communityServiceHrs
+                            : null,
+                        severity: highest,
+                        isTicket: isTicket,
+                      ),
                     );
-                  }
+                  },
                 ),
-        
-                const SizedBox(height: 10,),
-        
+
+                const SizedBox(height: 10),
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       padding: const EdgeInsets.all(15),
                       backgroundColor: Color(0xFFEBEEF1),
-                      foregroundColor: Color(0xFF8F8F8F)
+                      foregroundColor: Color(0xFF8F8F8F),
                     ),
-                    onPressed: () => Navigator.pop(context), 
-                    child: const Text('Back')
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Back'),
                   ),
-                )
+                ),
               ],
-            )
-          )
+            ),
+          ),
         ),
       ),
     );

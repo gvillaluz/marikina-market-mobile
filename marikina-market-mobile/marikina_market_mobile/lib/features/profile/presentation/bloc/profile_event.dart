@@ -1,3 +1,5 @@
+import 'package:image_picker/image_picker.dart';
+
 abstract class ProfileEvent {}
 
 class EditProfileSubmitted extends ProfileEvent {
@@ -10,7 +12,7 @@ class EditProfileSubmitted extends ProfileEvent {
     required this.userId,
     required this.lastName,
     required this.firstName,
-    this.middleName
+    this.middleName,
   });
 }
 
@@ -24,6 +26,13 @@ class UpdatePasswordSubmitted extends ProfileEvent {
     required this.userId,
     required this.currentPassword,
     required this.newPassword,
-    required this.confirmNewPassword
+    required this.confirmNewPassword,
   });
 }
+
+class ChangeProfilePhoto extends ProfileEvent {
+  final XFile file;
+  ChangeProfilePhoto({required this.file});
+}
+
+class RemoveProfilePhoto extends ProfileEvent {}

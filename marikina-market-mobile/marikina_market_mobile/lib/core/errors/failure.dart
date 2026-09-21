@@ -38,3 +38,7 @@ final class ConflictFailure extends Failure {
     super.message
   );
 }
+
+final class DuplicateWarningFailure extends Failure {
+  const DuplicateWarningFailure(super.message);
+}

@@ -1,6 +1,6 @@
 import 'package:marikina_market_mobile/core/errors/result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/entities/page_result.dart';
+import 'package:marikina_market_mobile/core/shared/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/repositories/inspection_repository.dart';
 

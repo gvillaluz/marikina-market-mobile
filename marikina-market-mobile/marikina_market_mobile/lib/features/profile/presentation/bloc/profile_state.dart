@@ -29,3 +29,15 @@ class ChangePasswordNetworkError extends ProfileState {
 }
 
 class PasswordChangedSuccessfully extends ProfileState {}
+
+class ProfilePhotoLoading extends ProfileState {}
+
+class ProfilePictureChanged extends ProfileState {
+  final User user;
+  ProfilePictureChanged(this.user);
+}
+
+class ChangeProfilePhotoFailed extends ProfileState {
+  final String message;
+  ChangeProfilePhotoFailed(this.message);
+}

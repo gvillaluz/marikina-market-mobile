@@ -35,10 +35,7 @@ class TicketDetailContent extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: AppColors.primaryYellow,
-                width: 1.5,
-              ),
+              border: Border.all(color: AppColors.primaryYellow, width: 1.5),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,10 +122,7 @@ class TicketDetailContent extends StatelessWidget {
                       ),
                       subtitle: Text(
                         droppedOrdinances![index].ordinanceCode,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
                       ),
                     ),
                   ),
@@ -141,22 +135,20 @@ class TicketDetailContent extends StatelessWidget {
         ],
 
         Text(
-          isTicket
-            ? 'Ticket Record'
-            : 'Written Warning Record',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-            ),
+          isTicket ? 'Ticket Record' : 'Written Warning Record',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           isTicket
-            ? 'Here is the record of the collected violation ticket, You can review the details below.'
-            : 'Please review the details below before issuing the warning.'
+              ? 'Here is the record of the collected violation ticket, You can review the details below.'
+              : 'Please review the details below before issuing the warning.',
         ),
 
-        const SizedBox(height: 20,),
+        const SizedBox(height: 20),
 
         Container(
           decoration: BoxDecoration(
@@ -168,8 +160,8 @@ class TicketDetailContent extends StatelessWidget {
                 offset: const Offset(-1, 1),
                 blurRadius: 3.5,
                 spreadRadius: 0,
-              )
-            ]
+              ),
+            ],
           ),
           padding: const EdgeInsets.only(top: 20, bottom: 20),
           child: Column(
@@ -183,14 +175,12 @@ class TicketDetailContent extends StatelessWidget {
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 18,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Text(
-                      'Marikina Public Market Office',
-                    ),
+                    const Text('Marikina Public Market Office'),
 
-                    const SizedBox(height: 20,),
+                    const SizedBox(height: 20),
 
                     Row(
                       spacing: 5,
@@ -201,18 +191,16 @@ class TicketDetailContent extends StatelessWidget {
                           width: 50,
                         ),
                         Text(
-                          isTicket
-                            ? 'VIOLATION TICKET'
-                            : 'WRITTEN WARNING',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold
-                            ),
+                          isTicket ? 'VIOLATION TICKET' : 'WRITTEN WARNING',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
 
                         const Spacer(),
-                        
+
                         if (isTicket) ...[
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -221,7 +209,7 @@ class TicketDetailContent extends StatelessWidget {
                                 'CONTROL NO.',
                                 style: TextStyle(
                                   color: AppColors.mediumGrey,
-                                  fontSize: 12
+                                  fontSize: 12,
                                 ),
                               ),
                               Text(
@@ -229,9 +217,9 @@ class TicketDetailContent extends StatelessWidget {
                                 style: TextStyle(
                                   color: AppColors.primaryRed,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16
+                                  fontSize: 16,
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ],
@@ -241,68 +229,62 @@ class TicketDetailContent extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20,),
-              const DottedLine(
-                dashLength: 5,
-                dashColor: AppColors.lightGrey,
-              ),
-              const SizedBox(height: 20,),
+              const SizedBox(height: 20),
+              const DottedLine(dashLength: 5, dashColor: AppColors.lightGrey),
+              const SizedBox(height: 20),
 
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: ViolatorDetailSection(
-                  stallNumber: ticket.stallNumber, 
-                  tradeName: ticket.tradeName, 
-                  fullName: '${ticket.lastName}, ${ticket.firstName}', 
-                  address: ticket.address!, 
-                  isTicket: isTicket
+                  stallNumber: ticket.stallNumber,
+                  tradeName: ticket.tradeName,
+                  fullName: '${ticket.lastName}, ${ticket.firstName}',
+                  address: ticket.address!,
+                  isTicket: isTicket,
                 ),
               ),
 
-              const SizedBox(height: 20,),
+              const SizedBox(height: 20),
               const Padding(
                 padding: EdgeInsets.only(left: 20, right: 20),
                 child: Divider(),
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(height: 20),
 
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: TicketViolationSection(
-                  violations: ticket.violations, 
-                  description: ticket.description, 
-                  marketSection: ticket.marketSectionName, 
-                  categories: ticket.categories, 
-                  isTicket: isTicket
+                  violations: ticket.violations,
+                  description: ticket.description,
+                  marketSection: ticket.marketSectionName,
+                  categories: ticket.categories,
+                  isTicket: isTicket,
                 ),
               ),
 
               if (isTicket) ...[
-                const SizedBox(height: 20,),
+                const SizedBox(height: 20),
                 const Padding(
                   padding: EdgeInsets.only(left: 20, right: 20),
                   child: Divider(),
                 ),
-                const SizedBox(height: 20,),
+                const SizedBox(height: 20),
 
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20),
                   child: TicketPenaltyDetail(
-                    severity: ticket.severity ?? Severity.low, 
-                    penaltyType: ticket.penaltyType ?? PenaltyType.cashFine, 
+                    severity: ticket.severity ?? Severity.minor,
+                    penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
                     totalFineAmount: ticket.totalFineAmount ?? 0.0,
                     dueDate: ticket.dueDate ?? DateTime.now(),
-                    communityHrs: 3
+                    communityHrs: 3,
                   ),
-                )
+                ),
               ],
 
-              const SizedBox(height: 20,),
-              const DottedLine(
-                dashLength: 5,
-                dashColor: AppColors.lightGrey,
-              ),
-              const SizedBox(height: 20,),
+              const SizedBox(height: 20),
+              const DottedLine(dashLength: 5, dashColor: AppColors.lightGrey),
+              const SizedBox(height: 20),
 
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
@@ -310,64 +292,60 @@ class TicketDetailContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Divider(),
-                            const Text('Issued By:'),
-                            const Text(
-                              'Market Officer',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold
-                              ),
-                            ),
-                            Text('Marikina City Public Market')
-                          ],
-                        )
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(),
+                          const Text('Issued By:'),
+                          const Text(
+                            'Market Officer',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text('Marikina City Public Market'),
+                        ],
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Divider(),
-                            const Text('Issued To:'),
-                            const Text(
-                              'Market Vendor',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold
-                              ),
-                            ),
-                            Text(
-                              'Date: ${DateTimeFormatter.getDate(ticket.issuedAt)}'
-                            )
-                          ],
-                        )
-                      )
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(),
+                          const Text('Issued To:'),
+                          const Text(
+                            'Market Vendor',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Date: ${DateTimeFormatter.getDate(ticket.issuedAt)}',
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
 
         if (isTicket) ...[
-          const SizedBox(height: 20,),
+          const SizedBox(height: 20),
 
           const Text(
             'Photo Evidence Record',
             style: TextStyle(
               color: AppColors.primary,
               fontSize: 20,
-              fontWeight: FontWeight.bold
+              fontWeight: FontWeight.bold,
             ),
           ),
           const Text(
-            'The image below serves as the photo evidence attached to this violation ticket.'
+            'The image below serves as the photo evidence attached to this violation ticket.',
           ),
 
-          const SizedBox(height: 10,),
-          
+          const SizedBox(height: 10),
+
           if (ticket.evidenceUrls == null) ...[
             Container(
               width: double.infinity,
@@ -404,18 +382,22 @@ class TicketDetailContent extends StatelessWidget {
                   const Text(
                     'There are no captured or recorded photo evidences for this ticket.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: AppColors.mediumGrey, height: 1.4),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.mediumGrey,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ),
             ),
           ] else ...[
             TicketDetailEvidenceSection(
-              evidences: ticket.evidenceUrls!, 
-              isTicket: isTicket
-            )
-          ]
-        ]
+              evidences: ticket.evidenceUrls!,
+              isTicket: isTicket,
+            ),
+          ],
+        ],
       ],
     );
   }

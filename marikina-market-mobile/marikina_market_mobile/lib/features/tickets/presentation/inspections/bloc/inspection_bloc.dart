@@ -5,7 +5,7 @@ import 'package:marikina_market_mobile/features/tickets/data/models/params/save_
 import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/entities/page_result.dart';
+import 'package:marikina_market_mobile/core/shared/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/get_fine_summary_use_case.dart';
@@ -26,7 +26,7 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
   final SaveInspectionTicketUseCase saveInspectionTicketUseCase;
 
   List<InspectionTicketSummary> _inspectionSummary = [];
-  List<InspectionTicketSummary> get inspectionSummaries => _inspectionSummary; 
+  List<InspectionTicketSummary> get inspectionSummaries => _inspectionSummary;
 
   List<Ordinance> _ordinances = [];
   List<Ordinance> get ordinances => _ordinances;
@@ -38,7 +38,7 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     required this.searchVendorByCodeUseCase,
     required this.searchVendorByStallUseCase,
     required this.getFineSummaryUseCase,
-    required this.saveInspectionTicketUseCase
+    required this.saveInspectionTicketUseCase,
   }) : super(InspectionInitial()) {
     on<LoadOrdinances>(_onLoadOrdinances);
     on<LoadInspectionTickets>(_onLoadInspectionTickets);
@@ -57,7 +57,10 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     }
   }
 
-  Future<void> _onLoadInspectionTickets(LoadInspectionTickets event, Emitter<InspectionState> emit) async {
+  Future<void> _onLoadInspectionTickets(
+    LoadInspectionTickets event,
+    Emitter<InspectionState> emit,
+  ) async {
     emit(InspectionLoading());
 
     final result = await loadInspectionListUseCase(event.offset, event.type);
@@ -65,23 +68,26 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     switch (result) {
       case Success<PageResult<InspectionTicketSummary>>():
         _inspectionSummary = event.offset == 0
-          ? result.data.tickets
-          : [..._inspectionSummary, ...result.data.tickets];
+            ? result.data.items
+            : [..._inspectionSummary, ...result.data.items];
         _hasLoadedTickets = true;
         emit(InspectionTicketsLoaded(_inspectionSummary, result.data.hasMore));
-        
+
       case ResultFailure<PageResult<InspectionTicketSummary>>():
         emit(InspectionTicketsLoaded([], false));
     }
   }
 
-  Future<void> _onSearchByCodeRequested(SearchByCodeRequested event, Emitter emit) async {
+  Future<void> _onSearchByCodeRequested(
+    SearchByCodeRequested event,
+    Emitter emit,
+  ) async {
     emit(InspectionSearchLoading());
 
     final result = await searchVendorByCodeUseCase(event.codeValue);
 
     switch (result) {
-      case Success(: final data):
+      case Success(:final data):
         emit(InspectionVendorSelected(data));
 
       case ResultFailure(failure: final failure):
@@ -89,13 +95,16 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     }
   }
 
-  Future<void> _onSearchByStallNumberRequested(SearchByStallNumberRequested event, Emitter emit) async {
+  Future<void> _onSearchByStallNumberRequested(
+    SearchByStallNumberRequested event,
+    Emitter emit,
+  ) async {
     emit(InspectionSearchLoading());
 
     final result = await searchVendorByStallUseCase(event.stallNumber);
 
     switch (result) {
-      case Success(: final data):
+      case Success(:final data):
         emit(InspectionSearchList(data));
 
       case ResultFailure(failure: final failure):
@@ -103,13 +112,16 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     }
   }
 
-  Future<void> _onLoadOrdinanceSelection(LoadOrdinanceSelection event, Emitter emit) async {
+  Future<void> _onLoadOrdinanceSelection(
+    LoadOrdinanceSelection event,
+    Emitter emit,
+  ) async {
     emit(OrdinanceSelectionLoading());
 
     if (_ordinances.isNotEmpty) {
       emit(OrdinanceSelectionLoaded(ordinances));
       return;
-    } 
+    }
 
     final result = await loadOrdinancesUseCase();
 
@@ -121,7 +133,10 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     }
   }
 
-  Future<void> _onFineSummaryRequested(FineSummaryRequested event, Emitter emit) async {
+  Future<void> _onFineSummaryRequested(
+    FineSummaryRequested event,
+    Emitter emit,
+  ) async {
     if (event.vendorId == null) {
       emit(FineSummaryError('Vendor is required to calculate fines.'));
       return;
@@ -131,61 +146,77 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
 
     final result = await getFineSummaryUseCase(
       event.ordinanceIds,
-      event.vendorId
+      event.vendorId,
     );
 
     switch (result) {
       case Success<FineSummary>(data: final data):
         emit(FineSummaryLoaded(data));
 
-      case ResultFailure(failure: NetworkFailure(: final message) ||
-                                  ServerFailure(: final message) ||
-                                  UnauthorizedFailure(: final message) ||
-                                  CacheFailure(: final message) ||
-                                  TokenValidationFailure(: final message) || 
-                                  ConflictFailure(: final message)):
+      case ResultFailure(
+        failure: NetworkFailure(:final message) ||
+            ServerFailure(:final message),
+      ):
         emit(FineSummaryNetworkError(message));
 
-      case ResultFailure(failure: ValidationFailure(: final message)):
+      case ResultFailure(failure: ValidationFailure(:final message)):
         emit(FineSummaryError(message));
+
+      case ResultFailure():
+        emit(FineSummaryError('Something went wrong. Please try again.'));
     }
   }
 
-  Future<void> _onNewInspectionSubmitted(NewInspectionSubmitted event, Emitter emit) async {
+  Future<void> _onNewInspectionSubmitted(
+    NewInspectionSubmitted event,
+    Emitter emit,
+  ) async {
     emit(SubmitNewTicketLoading());
 
-    final result = await saveInspectionTicketUseCase(SaveInspectionParams(
-      vendorId: event.vendorId, 
-      marketSectionId: event.marketSectionId, 
-      enforcerId: event.enforcerId,
-      ticketType: event.ticketType, 
-      description: event.description, 
-      penaltyType: event.penaltyType, 
-      communityServiceHours: event.communityServiceHours,
-      ordinanceIds: event.ordinanceIds, 
-      evidences: event.evidences
-    ));
+    final result = await saveInspectionTicketUseCase(
+      SaveInspectionParams(
+        vendorId: event.vendorId,
+        marketSectionId: event.marketSectionId,
+        enforcerId: event.enforcerId,
+        ticketType: event.ticketType,
+        description: event.description,
+        penaltyType: event.penaltyType,
+        communityServiceHours: event.communityServiceHours,
+        ordinanceIds: event.ordinanceIds,
+        evidences: event.evidences,
+      ),
+    );
 
     switch (result) {
-      case Success<SaveInspectionResult>(: final data):
+      case Success<SaveInspectionResult>(:final data):
         emit(SubmitNewTicketSuccess(data));
         if (_hasLoadedTickets) {
           _inspectionSummary = [..._inspectionSummary, data.inspectionSummary];
         } else {
           add(LoadInspectionTickets(0, ViolationType.warning));
         }
-      
-      case ResultFailure(failure: NetworkFailure(: final message) ||
-                                  ServerFailure(: final message) ||
-                                  CacheFailure(: final message) ||
-                                  TokenValidationFailure(: final message)):
+
+      case ResultFailure(
+        failure: NetworkFailure(:final message) ||
+            ServerFailure(:final message) ||
+            CacheFailure(:final message) ||
+            TokenValidationFailure(:final message),
+      ):
         emit(InspectionSubmitConnectionError(message));
 
-      case ResultFailure(failure: UnauthorizedFailure(: final message) ||
-                                  ValidationFailure(: final message)):
+      case ResultFailure(
+        failure: UnauthorizedFailure(:final message) ||
+            ValidationFailure(:final message),
+      ):
         emit(InspectionSubmitError(message));
-      case ResultFailure(failure: ConflictFailure(: final message, : final droppedOrdinances)):
+
+      case ResultFailure(
+        failure: ConflictFailure(:final message, :final droppedOrdinances),
+      ):
         emit(DuplicationConflictInspection(message, droppedOrdinances));
+
+      case ResultFailure(failure: DuplicateWarningFailure(:final message)):
+        emit(DuplicateWarningConflict(message));
     }
   }
 }

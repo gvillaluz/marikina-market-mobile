@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 
 class TicketFilterRow extends StatefulWidget {
   final TicketStatus statusSelected;

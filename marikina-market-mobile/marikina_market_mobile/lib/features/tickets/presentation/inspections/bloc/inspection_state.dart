@@ -99,3 +99,8 @@ class DuplicationConflictInspection extends InspectionState {
   final List<DuplicateOrdinance> duplicateOrdinances;
   DuplicationConflictInspection(this.message, this.duplicateOrdinances);
 }
+
+class DuplicateWarningConflict extends InspectionState {
+  final String message;
+  DuplicateWarningConflict(this.message);
+}
