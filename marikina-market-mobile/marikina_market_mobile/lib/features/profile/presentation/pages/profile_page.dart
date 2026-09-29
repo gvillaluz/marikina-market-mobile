@@ -54,134 +54,183 @@ class ProfilePage extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ProfileHeaderCard(
-                        user: state.user,
-                        onChangePhoto: (file) => context
-                            .read<ProfileBloc>()
-                            .add(ChangeProfilePhoto(file: file)),
-                        onRemovePhoto: () => context.read<ProfileBloc>().add(
-                          RemoveProfilePhoto(),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Account Information',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'Your account details and information',
-                        style: TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.lightGrey.withValues(alpha: 0.30),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 760),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ProfileHeaderCard(
+                            user: state.user,
+                            onChangePhoto: (file) => context
+                                .read<ProfileBloc>()
+                                .add(ChangeProfilePhoto(file: file)),
+                            onRemovePhoto: () => context
+                                .read<ProfileBloc>()
+                                .add(RemoveProfilePhoto()),
                           ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            ProfileDetailRow(
-                              label: 'LAST NAME',
-                              value: state.user.lastName,
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Account information',
+                            style: TextStyle(
+                              color: AppColors.primaryBlack,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
                             ),
-                            Divider(
-                              height: 1,
-                              color: AppColors.lightGrey.withValues(
-                                alpha: 0.30,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Your account details and information.',
+                            style: TextStyle(
+                              color: AppColors.mediumGrey,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: AppColors.lightGrey.withValues(
+                                  alpha: 0.35,
+                                ),
                               ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            ProfileDetailRow(
-                              label: 'FIRST NAME',
-                              value: state.user.firstName,
+                            child: Column(
+                              children: [
+                                ProfileDetailRow(
+                                  label: 'LAST NAME',
+                                  value: state.user.lastName,
+                                ),
+                                Divider(
+                                  height: 1,
+                                  color: AppColors.lightGrey.withValues(
+                                    alpha: 0.30,
+                                  ),
+                                ),
+                                ProfileDetailRow(
+                                  label: 'FIRST NAME',
+                                  value: state.user.firstName,
+                                ),
+                                Divider(
+                                  height: 1,
+                                  color: AppColors.lightGrey.withValues(
+                                    alpha: 0.30,
+                                  ),
+                                ),
+                                ProfileDetailRow(
+                                  label: 'MIDDLE NAME',
+                                  value: state.user.middleName,
+                                ),
+                                Divider(
+                                  height: 1,
+                                  color: AppColors.lightGrey.withValues(
+                                    alpha: 0.30,
+                                  ),
+                                ),
+                                ProfileDetailRow(
+                                  label: 'ACCOUNT STATUS',
+                                  value: null,
+                                  status: state.user.status,
+                                ),
+                                Divider(
+                                  height: 1,
+                                  color: AppColors.lightGrey.withValues(
+                                    alpha: 0.30,
+                                  ),
+                                ),
+                                ProfileDetailRow(
+                                  label: 'CREATED AT',
+                                  value: DateTimeFormatter.getDate(
+                                    state.user.createdAt,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Divider(
-                              height: 1,
-                              color: AppColors.lightGrey.withValues(
-                                alpha: 0.30,
-                              ),
+                          ),
+                          const SizedBox(height: 20),
+                          AppPrimaryButton(
+                            label: 'Edit Account Information',
+                            iconData: Icons.edit_square,
+                            onPressed: () {
+                              context.pushNamed(
+                                Routes.editProfileName,
+                                extra: state.user,
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          AppOutlinedBtn(
+                            label: 'Change Password',
+                            iconData: Icons.lock_outline,
+                            onPressed: () {
+                              context.pushNamed(
+                                Routes.changePasswordName,
+                                extra: state.user,
+                              );
+                            },
+                            foregroundColor: AppColors.primary,
+                            backgroundColor: AppColors.tertiary,
+                          ),
+                          const SizedBox(height: 28),
+                          const Divider(),
+                          const SizedBox(height: 20),
+                          AppOutlinedBtn(
+                            label: 'Logout',
+                            iconData: Icons.logout,
+                            onPressed: () {
+                              context.read<AuthBloc>().add(LogoutUser(false));
+                            },
+                            foregroundColor: AppColors.primaryRed,
+                            backgroundColor: AppColors.secondaryRed.withValues(
+                              alpha: 0.50,
                             ),
-                            ProfileDetailRow(
-                              label: 'MIDDLE NAME',
-                              value: state.user.middleName,
-                            ),
-                            Divider(
-                              height: 1,
-                              color: AppColors.lightGrey.withValues(
-                                alpha: 0.30,
-                              ),
-                            ),
-                            ProfileDetailRow(
-                              label: 'ACCOUNT STATUS',
-                              value: null,
-                              status: state.user.status,
-                            ),
-                            Divider(
-                              height: 1,
-                              color: AppColors.lightGrey.withValues(
-                                alpha: 0.30,
-                              ),
-                            ),
-                            ProfileDetailRow(
-                              label: 'CREATED AT',
-                              value: DateTimeFormatter.getDate(
-                                state.user.createdAt,
-                              ),
-                            ),
-                          ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          if (state is AuthError) {
+            return SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.person_off_outlined,
+                        color: AppColors.mediumGrey,
+                        size: 44,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Profile unavailable',
+                        style: TextStyle(
+                          color: AppColors.primaryBlack,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-
-                      const SizedBox(height: 20),
-
-                      AppPrimaryButton(
-                        label: 'Edit Account Information',
-                        iconData: Icons.edit_square,
-                        onPressed: () {
-                          context.pushNamed(
-                            Routes.editProfileName,
-                            extra: state.user,
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      AppOutlinedBtn(
-                        label: 'Change Password',
-                        iconData: Icons.lock_outline,
-                        onPressed: () {
-                          context.pushNamed(
-                            Routes.changePasswordName,
-                            extra: state.user,
-                          );
-                        },
-                        foregroundColor: AppColors.primary,
-                        backgroundColor: AppColors.tertiary,
-                      ),
-
-                      const SizedBox(height: 30),
-                      const Divider(),
-                      const SizedBox(height: 30),
-
-                      AppOutlinedBtn(
-                        label: 'Logout',
-                        iconData: Icons.logout,
-                        onPressed: () {
-                          context.read<AuthBloc>().add(LogoutUser(false));
-                        },
-                        foregroundColor: AppColors.primaryRed,
-                        backgroundColor: AppColors.secondaryRed.withValues(
-                          alpha: 0.50,
-                        ),
+                      const SizedBox(height: 6),
+                      Text(
+                        state.message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppColors.mediumGrey),
                       ),
                     ],
                   ),

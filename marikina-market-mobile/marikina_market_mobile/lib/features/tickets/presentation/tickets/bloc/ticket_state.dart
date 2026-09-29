@@ -1,4 +1,6 @@
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/community_service_progress.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_receipt_proof.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_summary.dart';
 
 abstract class TicketState {}
@@ -24,5 +26,48 @@ class TicketDetailLoading extends TicketState {}
 
 class TicketDetailLoaded extends TicketState {
   final TicketDetail ticket;
-  TicketDetailLoaded(this.ticket);
+  final TicketReceiptProof? receiptProof;
+  final CommunityServiceProgress? communityServiceProgress;
+  final bool isSettlementLoading;
+  final bool isSettlementLoaded;
+  final bool isSubmittingSettlement;
+  final bool isReceiptSubmitted;
+  final String? settlementMessage;
+
+  TicketDetailLoaded(
+    this.ticket, {
+    this.receiptProof,
+    this.communityServiceProgress,
+    this.isSettlementLoading = false,
+    this.isSettlementLoaded = false,
+    this.isSubmittingSettlement = false,
+    this.isReceiptSubmitted = false,
+    this.settlementMessage,
+  });
+
+  TicketDetailLoaded copyWith({
+    TicketReceiptProof? receiptProof,
+    CommunityServiceProgress? communityServiceProgress,
+    bool? isSettlementLoading,
+    bool? isSettlementLoaded,
+    bool? isSubmittingSettlement,
+    bool? isReceiptSubmitted,
+    String? settlementMessage,
+    bool clearSettlementMessage = false,
+  }) {
+    return TicketDetailLoaded(
+      ticket,
+      receiptProof: receiptProof ?? this.receiptProof,
+      communityServiceProgress:
+          communityServiceProgress ?? this.communityServiceProgress,
+      isSettlementLoading: isSettlementLoading ?? this.isSettlementLoading,
+      isSettlementLoaded: isSettlementLoaded ?? this.isSettlementLoaded,
+      isSubmittingSettlement:
+          isSubmittingSettlement ?? this.isSubmittingSettlement,
+      isReceiptSubmitted: isReceiptSubmitted ?? this.isReceiptSubmitted,
+      settlementMessage: clearSettlementMessage
+          ? null
+          : settlementMessage ?? this.settlementMessage,
+    );
+  }
 }

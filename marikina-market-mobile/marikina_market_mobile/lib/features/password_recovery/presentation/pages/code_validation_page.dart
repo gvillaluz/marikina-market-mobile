@@ -65,14 +65,14 @@ class _CodeValidationPageState extends State<CodeValidationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final channelValue = widget.args.channel == 'email'
         ? widget.args.account.maskedEmail
         : widget.args.account.masketPhoneNumber;
 
     final defaultPinTheme = PinTheme(
-      width: 44,
-      height: 52,
+      width: ((screenWidth - 120) / 6).clamp(30.0, 44.0).toDouble(),
+      height: 50,
       textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
@@ -99,157 +99,158 @@ class _CodeValidationPageState extends State<CodeValidationPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: BlocListener<PasswordRecoveryBloc, PasswordRecoveryState>(
-              listener: (context, state) {
-                if (state is OtpSent) {
-                  _startCountdown(state.result.resendCooldownSeconds);
-                }
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: BlocListener<PasswordRecoveryBloc, PasswordRecoveryState>(
+                  listener: (context, state) {
+                    if (state is OtpSent) {
+                      _startCountdown(state.result.resendCooldownSeconds);
+                    }
 
-                if (state is OtpVerified) {
-                  if (state.result.success) {
-                    context.goNamed(
-                      Routes.resetPasswordName,
-                      extra: ResetPasswordArgs(
-                        username: widget.args.username,
-                        resetToken: state.result.resetToken!,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: Container(
-                width: screenSize.width * 0.9,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.09),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
+                    if (state is OtpVerified && state.result.success) {
+                      context.goNamed(
+                        Routes.resetPasswordName,
+                        extra: ResetPasswordArgs(
+                          username: widget.args.username,
+                          resetToken: state.result.resetToken!,
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const LoginCardHeader(),
-
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'CHECK YOUR ${widget.args.channel.toUpperCase()}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          Text(
-                            'We\'ve sent a 6-digit verification code to $channelValue',
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          Center(
-                            child: Pinput(
-                              controller: _pinController,
-                              length: 6,
-                              defaultPinTheme: defaultPinTheme,
-                              focusedPinTheme: focusedPinTheme,
-                              submittedPinTheme: submittedPinTheme,
-                              errorPinTheme: errorPinTheme,
-                              // no onCompleted
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          BlocBuilder<
-                            PasswordRecoveryBloc,
-                            PasswordRecoveryState
-                          >(
-                            builder: (context, state) {
-                              return ResendText(
-                                cooldownSeconds: _remainingSeconds,
-                                isSending: state is SendOtpLoading,
-                                onResend: () =>
-                                    context.read<PasswordRecoveryBloc>().add(
-                                      SendOtp(
-                                        username: widget.args.username,
-                                        channel: widget.args.channel,
-                                      ),
-                                    ),
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          BlocBuilder<
-                            PasswordRecoveryBloc,
-                            PasswordRecoveryState
-                          >(
-                            builder: (context, state) {
-                              return AuthBtn(
-                                onPressed: () =>
-                                    context.read<PasswordRecoveryBloc>().add(
-                                      VerifyCode(
-                                        widget.args.username,
-                                        _pinController.text.trim(),
-                                      ),
-                                    ),
-                                isLoading: state is VerifyOtpLoading,
-                                label: 'Verify',
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 5),
-
-                          Center(
-                            child: TextButton(
-                              onPressed: () => Navigator.popUntil(
-                                context,
-                                (route) => route.isFirst,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const LoginCardHeader(),
+                        Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Check your ${widget.args.channel}',
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  color: AppColors.primaryBlack,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                              child: const Text('Back to login'),
-                            ),
-                          ),
-
-                          Center(
-                            child:
-                                BlocBuilder<
-                                  PasswordRecoveryBloc,
-                                  PasswordRecoveryState
-                                >(
-                                  builder: (context, state) {
-                                    if (state is OtpVerified &&
-                                        !state.result.success) {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Text(
-                                          state.result.message,
-                                          style: TextStyle(
-                                            color: AppColors.primaryRed,
+                              const SizedBox(height: 4),
+                              Text(
+                                'We sent a 6-digit verification code to $channelValue.',
+                                style: const TextStyle(
+                                  color: AppColors.mediumGrey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Center(
+                                child: Pinput(
+                                  controller: _pinController,
+                                  length: 6,
+                                  defaultPinTheme: defaultPinTheme,
+                                  focusedPinTheme: focusedPinTheme,
+                                  submittedPinTheme: submittedPinTheme,
+                                  errorPinTheme: errorPinTheme,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              BlocBuilder<
+                                PasswordRecoveryBloc,
+                                PasswordRecoveryState
+                              >(
+                                builder: (context, state) {
+                                  return ResendText(
+                                    cooldownSeconds: _remainingSeconds,
+                                    isSending: state is SendOtpLoading,
+                                    onResend: () => context
+                                        .read<PasswordRecoveryBloc>()
+                                        .add(
+                                          SendOtp(
+                                            username: widget.args.username,
+                                            channel: widget.args.channel,
                                           ),
                                         ),
-                                      );
-                                    }
-
-                                    return SizedBox.shrink();
-                                  },
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              BlocBuilder<
+                                PasswordRecoveryBloc,
+                                PasswordRecoveryState
+                              >(
+                                builder: (context, state) {
+                                  return AuthBtn(
+                                    onPressed: () => context
+                                        .read<PasswordRecoveryBloc>()
+                                        .add(
+                                          VerifyCode(
+                                            widget.args.username,
+                                            _pinController.text.trim(),
+                                          ),
+                                        ),
+                                    isLoading: state is VerifyOtpLoading,
+                                    label: 'Verify',
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 5),
+                              Center(
+                                child: TextButton(
+                                  onPressed: () => Navigator.popUntil(
+                                    context,
+                                    (route) => route.isFirst,
+                                  ),
+                                  child: const Text('Back to login'),
                                 ),
+                              ),
+                              Center(
+                                child:
+                                    BlocBuilder<
+                                      PasswordRecoveryBloc,
+                                      PasswordRecoveryState
+                                    >(
+                                      builder: (context, state) {
+                                        if (state is OtpVerified &&
+                                            !state.result.success) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                            child: Text(
+                                              state.result.message,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                color: AppColors.primaryRed,
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                        return const SizedBox.shrink();
+                                      },
+                                    ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

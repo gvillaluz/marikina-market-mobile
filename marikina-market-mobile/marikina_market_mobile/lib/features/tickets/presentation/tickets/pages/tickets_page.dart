@@ -53,6 +53,7 @@ class _TicketsPageState extends State<TicketsPage> {
       setState(() => _isLoadingMore = true);
       context.read<TicketBloc>().add(
         LoadTicketSummary(
+          search: _searchController.text.trim(),
           offset: state.ticketSummary.length,
           status: _selectedStatus,
         ),
@@ -78,7 +79,11 @@ class _TicketsPageState extends State<TicketsPage> {
     setState(() => _selectedStatus = status);
 
     context.read<TicketBloc>().add(
-      LoadTicketSummary(offset: 0, status: status),
+      LoadTicketSummary(
+        search: _searchController.text.trim(),
+        offset: 0,
+        status: status,
+      ),
     );
   }
 
@@ -88,7 +93,11 @@ class _TicketsPageState extends State<TicketsPage> {
       child: RefreshIndicator(
         onRefresh: () async {
           context.read<TicketBloc>().add(
-            LoadTicketSummary(offset: 0, status: _selectedStatus),
+            LoadTicketSummary(
+              search: _searchController.text.trim(),
+              offset: 0,
+              status: _selectedStatus,
+            ),
           );
 
           await context.read<TicketBloc>().stream.firstWhere(
@@ -106,25 +115,87 @@ class _TicketsPageState extends State<TicketsPage> {
             physics: AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.all(20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    TextField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.search),
-                        hintText: 'Search',
-                        hintStyle: TextStyle(color: AppColors.lightGrey),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Tickets',
+                        style: TextStyle(
+                          color: AppColors.primaryBlack,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                    ),
-                    const SizedBox(height: 10),
-                    TicketFilterRow(
-                      statusSelected: _selectedStatus,
-                      onChange: (status) => _handleChangeStatus(status),
-                    ),
-                  ]),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Review issued tickets and settlement status.',
+                        style: TextStyle(
+                          color: AppColors.mediumGrey,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _searchController,
+                        builder: (context, value, child) {
+                          return TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.search,
+                                color: AppColors.mediumGrey,
+                              ),
+                              suffixIcon: value.text.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      tooltip: 'Clear search',
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        _onSearchChanged('');
+                                      },
+                                      icon: const Icon(Icons.close),
+                                    ),
+                              hintText: 'Search tickets',
+                              hintStyle: const TextStyle(
+                                color: AppColors.mediumGrey,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: AppColors.lightGrey.withValues(
+                                    alpha: 0.65,
+                                  ),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                            onTapOutside: (event) =>
+                                FocusScope.of(context).unfocus(),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                      TicketFilterRow(
+                        statusSelected: _selectedStatus,
+                        onChange: _handleChangeStatus,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const TicketListSection(),

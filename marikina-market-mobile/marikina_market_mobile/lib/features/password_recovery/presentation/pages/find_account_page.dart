@@ -30,116 +30,124 @@ class _FindAccountPageState extends State<FindAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: BlocListener<PasswordRecoveryBloc, PasswordRecoveryState>(
-              listener: (context, state) {
-                if (state is AccountFound) {
-                  context.pushNamed(
-                    Routes.forgotPasswordOptionName,
-                    extra: ForgotPasswordOptionArgs(
-                      username: usernameController.text.trim(),
-                    ),
-                  );
-                }
-              },
-              child: Container(
-                width: screenSize.width * 0.9,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.09),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const LoginCardHeader(),
-
-                    Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'FIND YOUR ACCOUNT',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 20,
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child:
+                    BlocListener<PasswordRecoveryBloc, PasswordRecoveryState>(
+                      listener: (context, state) {
+                        if (state is AccountFound) {
+                          context.pushNamed(
+                            Routes.forgotPasswordOptionName,
+                            extra: ForgotPasswordOptionArgs(
+                              username: usernameController.text.trim(),
                             ),
-                          ),
-                          const Text(
-                            'Please enter your username.',
-                            style: TextStyle(color: AppColors.primary),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          const Text('USERNAME'),
-                          const SizedBox(height: 7),
-                          TextField(
-                            controller: usernameController,
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.person_rounded),
-
-                              hintText: 'Enter your username',
-                              hintStyle: TextStyle(
-                                color: AppColors.lightGrey,
-                                fontSize: 14,
-                              ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 18,
+                              offset: const Offset(0, 6),
                             ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          BlocBuilder<
-                            PasswordRecoveryBloc,
-                            PasswordRecoveryState
-                          >(
-                            builder: (context, state) {
-                              return Column(
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const LoginCardHeader(),
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  AuthBtn(
-                                    isLoading: state is SearchAccountLoading,
-                                    onPressed: _searchAccount,
-                                    label: 'Continue',
+                                  const Text(
+                                    'Find your account',
+                                    style: TextStyle(
+                                      color: AppColors.primaryBlack,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-
-                                  const SizedBox(height: 10),
-
-                                  if (state is SearchAccountFailed) ...{
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 20,
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Enter your username to continue.',
+                                    style: TextStyle(
+                                      color: AppColors.mediumGrey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  const Text('USERNAME'),
+                                  const SizedBox(height: 7),
+                                  TextField(
+                                    controller: usernameController,
+                                    textInputAction: TextInputAction.done,
+                                    onSubmitted: (_) => _searchAccount(),
+                                    onTapOutside: (_) =>
+                                        FocusScope.of(context).unfocus(),
+                                    decoration: InputDecoration(
+                                      prefixIcon: const Icon(
+                                        Icons.person_rounded,
                                       ),
-                                      child: Text(
-                                        state.message,
-                                        style: TextStyle(
-                                          color: AppColors.primaryRed,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                      hintText: 'Enter your username',
+                                      hintStyle: const TextStyle(
+                                        color: AppColors.lightGrey,
+                                        fontSize: 14,
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                  },
+                                  ),
+                                  const SizedBox(height: 20),
+                                  BlocBuilder<
+                                    PasswordRecoveryBloc,
+                                    PasswordRecoveryState
+                                  >(
+                                    builder: (context, state) {
+                                      return Column(
+                                        children: [
+                                          AuthBtn(
+                                            isLoading:
+                                                state is SearchAccountLoading,
+                                            onPressed: _searchAccount,
+                                            label: 'Continue',
+                                          ),
+                                          if (state is SearchAccountFailed) ...[
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              state.message,
+                                              style: const TextStyle(
+                                                color: AppColors.primaryRed,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ],
+                                      );
+                                    },
+                                  ),
                                 ],
-                              );
-                            },
-                          ),
-                        ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
               ),
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
@@ -5,6 +7,9 @@ import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/core/utils/date_formatter_util.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/community_service_progress.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/submit_community_service_log_params.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_receipt_proof.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_detail_evidence_section.dart';
@@ -16,10 +21,29 @@ import 'package:marikina_market_mobile/features/tickets/presentation/tickets/wid
 class TicketDetailContent extends StatelessWidget {
   final TicketDetail ticket;
   final List<DuplicateOrdinance>? droppedOrdinances;
+  final TicketReceiptProof? receiptProof;
+  final bool isReceiptSubmitted;
+  final CommunityServiceProgress? communityServiceProgress;
+  final bool isSettlementLoading;
+  final bool isSettlementLoaded;
+  final bool isSubmittingSettlement;
+  final VoidCallback onRetrySettlementLoad;
+  final ValueChanged<File> onSubmitReceipt;
+  final ValueChanged<SubmitCommunityServiceLogParams>
+  onSubmitCommunityServiceLog;
 
   const TicketDetailContent({
     required this.ticket,
     required this.droppedOrdinances,
+    required this.onSubmitReceipt,
+    required this.onSubmitCommunityServiceLog,
+    required this.onRetrySettlementLoad,
+    this.receiptProof,
+    this.isReceiptSubmitted = false,
+    this.communityServiceProgress,
+    this.isSettlementLoading = false,
+    this.isSettlementLoaded = false,
+    this.isSubmittingSettlement = false,
     super.key,
   });
 
@@ -402,8 +426,19 @@ class TicketDetailContent extends StatelessWidget {
           if (isTicket) ...[
             const SizedBox(height: 20),
             TicketSettlementSection(
+              ticketId: ticket.ticketId,
               penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
+              ticketStatus: ticket.ticketStatus,
               requiredHours: ticket.communityServiceHours,
+              receiptProof: receiptProof,
+              isReceiptSubmitted: isReceiptSubmitted,
+              communityServiceProgress: communityServiceProgress,
+              isLoading: isSettlementLoading,
+              isLoaded: isSettlementLoaded,
+              isSubmitting: isSubmittingSettlement,
+              onRetryLoad: onRetrySettlementLoad,
+              onSubmitReceipt: onSubmitReceipt,
+              onSubmitCommunityServiceLog: onSubmitCommunityServiceLog,
             ),
           ],
         ],

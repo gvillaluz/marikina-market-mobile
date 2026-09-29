@@ -52,90 +52,103 @@ class _ForgotPasswordOptionPageState extends State<ForgotPasswordOptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Container(
-              width: screenSize.width * 0.9,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.09),
-                    blurRadius: 15,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 4),
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const LoginCardHeader(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const LoginCardHeader(),
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Choose a recovery method',
+                              style: TextStyle(
+                                color: AppColors.primaryBlack,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Select how you would like to access your account.',
+                              style: TextStyle(
+                                color: AppColors.mediumGrey,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            BlocBuilder<
+                              PasswordRecoveryBloc,
+                              PasswordRecoveryState
+                            >(
+                              builder: (context, state) {
+                                if (_account != null) {
+                                  return _buildContent(context, _account!);
+                                }
 
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'FORGOT PASSWORD',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 20,
-                          ),
+                                if (state is SearchAccountLoading) {
+                                  return const SizedBox(
+                                    height: 180,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (state is SearchAccountFailed) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    child: Text(
+                                      state.message,
+                                      style: const TextStyle(
+                                        color: AppColors.primaryRed,
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (state is AccountFound) {
+                                  return _buildContent(
+                                    context,
+                                    state.accountLookup,
+                                  );
+                                }
+
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ],
                         ),
-                        const Text(
-                          'Please select and option to access your account.',
-                          style: TextStyle(color: AppColors.primary),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        BlocBuilder<
-                          PasswordRecoveryBloc,
-                          PasswordRecoveryState
-                        >(
-                          builder: (context, state) {
-                            if (_account != null) {
-                              return _buildContent(context, _account!);
-                            }
-
-                            if (state is SearchAccountLoading) {
-                              return SizedBox(
-                                height: 400,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              );
-                            }
-
-                            if (state is SearchAccountFailed) {
-                              return Text(state.message);
-                            }
-
-                            if (state is AccountFound) {
-                              return _buildContent(
-                                context,
-                                state.accountLookup,
-                              );
-                            }
-
-                            return SizedBox.shrink();
-                          },
-                        ),
-
-                        const SizedBox(height: 10),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

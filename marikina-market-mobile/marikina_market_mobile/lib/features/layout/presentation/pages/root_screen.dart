@@ -26,6 +26,10 @@ class RootScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
       leadingWidth: 55,
       leading: Padding(
         padding: const EdgeInsets.only(left: 15),
@@ -39,19 +43,26 @@ class RootScreen extends StatelessWidget {
 
       title: Text(
         _titles[navigationShell.currentIndex],
-        style: TextStyle(
-          color: AppColors.primary,
-          fontWeight: FontWeight.bold,
-          letterSpacing: .7,
+        style: const TextStyle(
+          color: AppColors.primaryBlack,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          letterSpacing: .2,
         ),
       ),
 
       actions: [
         IconButton(
+          tooltip: 'Notifications',
           onPressed: () => context.pushNamed(Routes.notificationsName),
-          icon: Icon(Icons.notifications, size: 30, color: AppColors.primary),
+          style: IconButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            backgroundColor: AppColors.primary.withValues(alpha: .08),
+            shape: const CircleBorder(),
+          ),
+          icon: const Icon(Icons.notifications_outlined, size: 24),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 16),
       ],
     );
   }

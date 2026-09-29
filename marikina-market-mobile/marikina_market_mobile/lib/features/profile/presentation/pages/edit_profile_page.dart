@@ -61,6 +61,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
           child: BlocListener<ProfileBloc, ProfileState>(
             listener: (context, state) {
               if (state is EditProfileError) {
@@ -86,27 +87,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 context.pop();
               }
             },
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Update your account information',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Update your account information',
+                      style: TextStyle(
+                        color: AppColors.primaryBlack,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  EditProfileCard(
-                    lastNameController: _lastNameController,
-                    firstNameController: _firstNameController,
-                    middleNameController: _middleNameController,
-                    onSaveChanges: onSaveChanges,
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Keep your name details up to date.',
+                      style: TextStyle(
+                        color: AppColors.mediumGrey,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    EditProfileCard(
+                      lastNameController: _lastNameController,
+                      firstNameController: _firstNameController,
+                      middleNameController: _middleNameController,
+                      onSaveChanges: onSaveChanges,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

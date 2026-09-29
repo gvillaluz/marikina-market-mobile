@@ -24,10 +24,12 @@ class EvidenceGalleryScreen extends StatefulWidget {
 class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
   late PageController _pageController;
   late int _currentIndex;
+  late List<ImageProvider> _imageProviders;
 
   @override
   void initState() {
     super.initState();
+    _imageProviders = List.of(widget.imageProviders);
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
   }
@@ -48,7 +50,7 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
   }
 
   void _goToNext() {
-    if (_currentIndex < widget.imageProviders.length - 1) {
+    if (_currentIndex < _imageProviders.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -56,8 +58,30 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
     }
   }
 
+  void _deleteCurrentImage() {
+    if (!widget.isEditing || widget.onDelete == null) return;
+
+    widget.onDelete!(_currentIndex);
+    if (_imageProviders.length == 1) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    setState(() {
+      _imageProviders.removeAt(_currentIndex);
+      if (_currentIndex >= _imageProviders.length) {
+        _currentIndex = _imageProviders.length - 1;
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _pageController.jumpToPage(_currentIndex);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_imageProviders.isEmpty) return const SizedBox.shrink();
+
     return Scaffold(
       backgroundColor: AppColors.primaryBlack,
       body: SafeArea(
@@ -68,14 +92,16 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
               scrollPhysics: const BouncingScrollPhysics(),
               builder: (BuildContext context, int index) {
                 return PhotoViewGalleryPageOptions(
-                  imageProvider: widget.imageProviders[index],
+                  imageProvider: _imageProviders[index],
                   initialScale: PhotoViewComputedScale.contained,
                   minScale: PhotoViewComputedScale.contained,
                   maxScale: PhotoViewComputedScale.covered * 2,
-                  heroAttributes: PhotoViewHeroAttributes(tag: widget.imageProviders[index]),
+                  heroAttributes: PhotoViewHeroAttributes(
+                    tag: _imageProviders[index],
+                  ),
                 );
               },
-              itemCount: widget.imageProviders.length,
+              itemCount: _imageProviders.length,
               loadingBuilder: (context, event) => const Center(
                 child: CircularProgressIndicator(color: AppColors.primaryLight),
               ),
@@ -95,32 +121,29 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: Navigator.of(context).pop, 
-                    icon: Icon(
-                      Icons.close,
-                      color: AppColors.primaryLight,
-                    )
+                    onPressed: Navigator.of(context).pop,
+                    icon: Icon(Icons.close, color: AppColors.primaryLight),
                   ),
 
                   Text(
-                    'Image ${_currentIndex + 1} of ${widget.imageProviders.length}',
+                    'Image ${_currentIndex + 1} of ${_imageProviders.length}',
                     style: TextStyle(
                       color: AppColors.primaryLight,
-                      fontSize: 16
+                      fontSize: 16,
                     ),
                   ),
 
                   IconButton(
-                    onPressed: widget.isEditing 
-                      ? () => widget.onDelete!(_currentIndex)
-                      : null, 
+                    onPressed: widget.isEditing && widget.onDelete != null
+                        ? _deleteCurrentImage
+                        : null,
                     icon: Icon(
                       Icons.delete_outline,
                       color: AppColors.primaryLight,
-                    )
-                  )
+                    ),
+                  ),
                 ],
-              )
+              ),
             ),
 
             Positioned(
@@ -139,7 +162,10 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
                       foregroundColor: Colors.white,
                       disabledBackgroundColor: const Color(0xFF1E1E20),
                       disabledForegroundColor: Colors.grey,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -147,13 +173,20 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
                   ),
 
                   ElevatedButton(
-                    onPressed: _currentIndex < widget.imageProviders.length - 1 ? _goToNext : null,
+                    onPressed: _currentIndex < _imageProviders.length - 1
+                        ? _goToNext
+                        : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D47A1), // Blue pill style
+                      backgroundColor: const Color(
+                        0xFF0D47A1,
+                      ), // Blue pill style
                       foregroundColor: Colors.white,
                       disabledBackgroundColor: const Color(0xFF1E1E20),
                       disabledForegroundColor: Colors.grey,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -168,8 +201,8 @@ class _EvidenceGalleryScreenState extends State<EvidenceGalleryScreen> {
                     ),
                   ),
                 ],
-              )
-            )
+              ),
+            ),
           ],
         ),
       ),

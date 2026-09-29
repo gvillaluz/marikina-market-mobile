@@ -98,8 +98,23 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
         _fineSummary!.breakdownItems.removeWhere(
           (item) => item.ordinanceId == removedOrdinance.id,
         );
+        if (_highestSelectedSeverity == Severity.high) {
+          _selectedPenaltyType = PenaltyType.cashFine;
+        }
       }
     });
+  }
+
+  Severity get _highestSelectedSeverity {
+    final breakdownItems = _fineSummary?.breakdownItems ?? [];
+    if (breakdownItems.isEmpty) return Severity.minor;
+
+    return breakdownItems
+        .map((item) => item.severity)
+        .reduce(
+          (highest, severity) =>
+              severity.compareTo(highest) > 0 ? severity : highest,
+        );
   }
 
   bool get _isFormEmpty {
@@ -194,6 +209,9 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
 
       setState(() {
         _fineSummary = fineSummary;
+        if (_highestSelectedSeverity == Severity.high) {
+          _selectedPenaltyType = PenaltyType.cashFine;
+        }
 
         final duplicatedSummaryIds = _fineSummary?.breakdownItems
             .where((f) => f.isDuplicate == true)
@@ -361,214 +379,245 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
         body: SafeArea(
           child: Form(
             key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_vendorSummary == null) ...[
-                    ViolatorInfoCard(
-                      onVendorSelected: _populateVendorInfo,
-                      errorMessage: _vendorError,
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  if (_vendorSummary != null) ...[
-                    VendorSummaryBanner(
-                      vendor: _vendorSummary!,
-                      onChangeVendor: () =>
-                          setState(() => _vendorSummary = null),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    InspectionTypeToggle(
-                      selected: _selectedType,
-                      onChange: (type) => setState(() {
-                        _selectedType = type;
-                        _selectedOrdinances = [];
-                        _fineSummary = null;
-                        _photoError = null;
-                        _ordinanceError = null;
-                        _communityHrsError = null;
-                      }),
-                      isEnabled: _vendorSummary!.canIssueWarning,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    if (!_vendorSummary!.canIssueWarning) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 15,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Inspection details',
+                        style: TextStyle(
+                          color: AppColors.primaryBlack,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.tertiaryYellow.withValues(
-                            alpha: .50,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.primaryYellow),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _vendorSummary == null
+                            ? 'Select a registered vendor or enter the stall information to begin.'
+                            : 'Complete the inspection details, then review them before submitting.',
+                        style: const TextStyle(
+                          color: AppColors.mediumGrey,
+                          fontSize: 14,
+                          height: 1.4,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 10,
-                          children: [
-                            Icon(
-                              Icons.warning_amber,
-                              color: AppColors.secondaryYellow,
-                              size: 30,
+                      ),
+                      const SizedBox(height: 20),
+                      if (_vendorSummary == null) ...[
+                        ViolatorInfoCard(
+                          onVendorSelected: _populateVendorInfo,
+                          errorMessage: _vendorError,
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+
+                      if (_vendorSummary != null) ...[
+                        VendorSummaryBanner(
+                          vendor: _vendorSummary!,
+                          onChangeVendor: () =>
+                              setState(() => _vendorSummary = null),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        InspectionTypeToggle(
+                          selected: _selectedType,
+                          onChange: (type) => setState(() {
+                            _selectedType = type;
+                            _selectedOrdinances = [];
+                            _fineSummary = null;
+                            _photoError = null;
+                            _ordinanceError = null;
+                            _communityHrsError = null;
+                          }),
+                          isEnabled: _vendorSummary!.canIssueWarning,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        if (!_vendorSummary!.canIssueWarning) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 15,
                             ),
-                            Expanded(
-                              child: Column(
-                                spacing: 5,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'A warning has already been issued to this vendor for this week.',
-                                    style: TextStyle(
-                                      color: AppColors.secondaryYellow,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    softWrap: true,
+                            decoration: BoxDecoration(
+                              color: AppColors.tertiaryYellow.withValues(
+                                alpha: .50,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.primaryYellow,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 10,
+                              children: [
+                                Icon(
+                                  Icons.warning_amber,
+                                  color: AppColors.secondaryYellow,
+                                  size: 30,
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    spacing: 5,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'A warning has already been issued to this vendor for this week.',
+                                        style: TextStyle(
+                                          color: AppColors.secondaryYellow,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        softWrap: true,
+                                      ),
+
+                                      if (_vendorSummary
+                                              ?.activeWarningIssuedAt !=
+                                          null) ...[
+                                        Text(
+                                          DateTimeFormatter.getDateTime(
+                                            _vendorSummary!
+                                                .activeWarningIssuedAt!,
+                                          ),
+                                          style: TextStyle(
+                                            color: AppColors.mediumGrey,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-
-                                  if (_vendorSummary?.activeWarningIssuedAt !=
-                                      null) ...[
-                                    Text(
-                                      DateTimeFormatter.getDateTime(
-                                        _vendorSummary!.activeWarningIssuedAt!,
-                                      ),
-                                      style: TextStyle(
-                                        color: AppColors.mediumGrey,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
+                        ],
+
+                        const SizedBox(height: 20),
+
+                        TicketViolationCard(
+                          onPressed: _handleOrdinanceSelect,
+                          onDelete: _onDeleteFineSummary,
+                          ordinances: _selectedOrdinances,
+                          capturedPhotos: _capturedEvidences,
+                          fineSummary: _fineSummary,
+                          isTicket: isTicket,
+                          errorMessage: _ordinanceError,
                         ),
-                      ),
-                    ],
 
-                    const SizedBox(height: 20),
+                        if (_fineSummary != null &&
+                            _fineSummary!.breakdownItems.isNotEmpty &&
+                            isTicket &&
+                            _selectedOrdinances.isNotEmpty) ...[
+                          PaymentTypeSection(
+                            selectedPenaltyType: _selectedPenaltyType,
+                            severity: _highestSelectedSeverity,
+                            totalFineAmount:
+                                _fineSummary?.totalPaymentAmount ?? 0.0,
+                            onChangeType: _onChangePenaltyType,
+                            communityHrsController: _communityHrsController,
+                            communityHrsError: _communityHrsError,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
 
-                    TicketViolationCard(
-                      onPressed: _handleOrdinanceSelect,
-                      onDelete: _onDeleteFineSummary,
-                      ordinances: _selectedOrdinances,
-                      capturedPhotos: _capturedEvidences,
-                      fineSummary: _fineSummary,
-                      isTicket: isTicket,
-                      errorMessage: _ordinanceError,
-                    ),
+                        const Text('DESCRIPTION'),
+                        const SizedBox(height: 5),
+                        TextFormField(
+                          controller: _ticketDescriptionController,
+                          maxLines: 5,
+                          minLines: 3,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          onTapOutside: (event) =>
+                              FocusScope.of(context).unfocus(),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Description is required.';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            errorText: _descriptionError,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
 
-                    if (_fineSummary != null &&
-                        _fineSummary!.breakdownItems.isNotEmpty &&
-                        isTicket &&
-                        _selectedOrdinances.isNotEmpty) ...[
-                      PaymentTypeSection(
-                        selectedPenaltyType: _selectedPenaltyType,
-                        severity: _fineSummary?.severity ?? Severity.minor,
-                        totalFineAmount:
-                            _fineSummary?.totalPaymentAmount ?? 0.0,
-                        onChangeType: _onChangePenaltyType,
-                        communityHrsController: _communityHrsController,
-                        communityHrsError: _communityHrsError,
-                      ),
-                      const SizedBox(height: 20),
-                    ],
+                        if (isTicket) ...[
+                          const SizedBox(height: 20),
+                          const Text('PHOTO EVIDENCE'),
+                          const SizedBox(height: 5),
 
-                    const Text('DESCRIPTION'),
-                    const SizedBox(height: 5),
-                    TextFormField(
-                      controller: _ticketDescriptionController,
-                      maxLines: 5,
-                      minLines: 3,
-                      keyboardType: TextInputType.multiline,
-                      textInputAction: TextInputAction.newline,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Description is required.';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        errorText: _descriptionError,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
+                          AddPhotoEvidenceBtn(
+                            photos: _capturedEvidences,
+                            onPhotoAdded: (photo) => addEvidence(photo),
+                            onPhotoRemoved: (index) => removeEvidence(index),
+                            isInvalid: _photoError != null,
+                          ),
 
-                    if (isTicket) ...[
-                      const SizedBox(height: 20),
-                      const Text('PHOTO EVIDENCE'),
-                      const SizedBox(height: 5),
-
-                      AddPhotoEvidenceBtn(
-                        photos: _capturedEvidences,
-                        onPhotoAdded: (photo) => addEvidence(photo),
-                        onPhotoRemoved: (index) => removeEvidence(index),
-                        isInvalid: _photoError != null,
-                      ),
-
-                      if (_photoError != null) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const SizedBox(width: 15),
-                            Text(
-                              _photoError!,
-                              style: const TextStyle(
-                                color: AppColors.primaryRed,
-                                fontSize: 12,
-                              ),
+                          if (_photoError != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const SizedBox(width: 15),
+                                Text(
+                                  _photoError!,
+                                  style: const TextStyle(
+                                    color: AppColors.primaryRed,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
+                        ],
+
+                        const SizedBox(height: 30),
+
+                        AppPrimaryButton(
+                          label: 'Submit ${isTicket ? 'Ticket' : 'Warning'}',
+                          iconData: Icons.gavel,
+                          onPressed: _submit,
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primaryRed,
+                              backgroundColor: AppColors.secondaryRed
+                                  .withValues(alpha: .30),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              side: BorderSide(color: AppColors.primaryRed),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                            ),
+                            onPressed: () async {
+                              if (_isFormEmpty) {
+                                Navigator.of(context).pop();
+                              } else if (await _confirmDiscard(context) &&
+                                  context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: const Text('Cancel'),
+                          ),
                         ),
                       ],
                     ],
-
-                    const SizedBox(height: 30),
-
-                    AppPrimaryButton(
-                      label: 'Submit ${isTicket ? 'Ticket' : 'Warning'}',
-                      iconData: Icons.gavel,
-                      onPressed: _submit,
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryRed,
-                          backgroundColor: AppColors.secondaryRed.withValues(
-                            alpha: .30,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          side: BorderSide(color: AppColors.primaryRed),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        onPressed: () async {
-                          if (_isFormEmpty) {
-                            Navigator.of(context).pop();
-                          } else if (await _confirmDiscard(context) &&
-                              context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                  ],
-                ],
+                  ),
+                ),
               ),
             ),
           ),

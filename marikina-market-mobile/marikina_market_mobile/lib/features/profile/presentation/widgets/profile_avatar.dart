@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/core/utils/image_picker_util.dart';
 import 'package:marikina_market_mobile/features/profile/data/cache_manager/avatar_cache_manager.dart';
 import 'package:marikina_market_mobile/features/profile/domain/enums/avatar_action.dart';
 
@@ -44,7 +45,8 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   @override
   Widget build(BuildContext context) {
     Future<void> changeProfilePicture() async {
-      final photo = await ImagePicker().pickImage(
+      final photo = await ImagePickerUtil.pickImage(
+        context: context,
         source: ImageSource.gallery,
         imageQuality: 100,
       );

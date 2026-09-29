@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/core/utils/image_picker_util.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/widgets/evidence_gallery_screen.dart';
 
 class AddPhotoEvidenceBtn extends StatefulWidget {
@@ -25,7 +26,8 @@ class AddPhotoEvidenceBtn extends StatefulWidget {
 
 class _AddPhotoEvidenceBtnState extends State<AddPhotoEvidenceBtn> {
   Future<void> _captureEvidence() async {
-    final photo = await ImagePicker().pickImage(
+    final photo = await ImagePickerUtil.pickImage(
+      context: context,
       source: ImageSource.camera,
       imageQuality: 100,
       preferredCameraDevice: CameraDevice.rear,

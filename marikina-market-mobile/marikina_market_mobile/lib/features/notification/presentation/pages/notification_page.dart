@@ -26,30 +26,56 @@ class _NotificationPageState extends State<NotificationPage> {
           'Notifications',
           style: TextStyle(
             color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: .7,
+            fontWeight: FontWeight.w700,
+            letterSpacing: .2,
           ),
         ),
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async {},
+          color: AppColors.primary,
+          onRefresh: () async {
+            context.read<NotificationBloc>().add(
+              LoadNotifications(0, selectedOption),
+            );
+            await context.read<NotificationBloc>().stream.firstWhere(
+              (state) =>
+                  state is NotificationLoaded || state is NotificationFailed,
+            );
+          },
           child: CustomScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 20,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    Filters(
-                      filterOption: selectedOption,
-                      onChange: (option) =>
-                          setState(() => selectedOption = option),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                sliver: SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 760),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Keep track of updates to your tickets.',
+                            style: TextStyle(
+                              color: AppColors.mediumGrey,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Filters(
+                            filterOption: selectedOption,
+                            onChange: (option) {
+                              setState(() => selectedOption = option);
+                              context.read<NotificationBloc>().add(
+                                LoadNotifications(0, option),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ]),
+                  ),
                 ),
               ),
 
@@ -57,16 +83,26 @@ class _NotificationPageState extends State<NotificationPage> {
                 builder: (context, state) {
                   if (state is NotificationLoading) {
                     return SliverToBoxAdapter(
-                      child: NotificationListSkeleton(),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: const NotificationListSkeleton(),
+                        ),
+                      ),
                     );
                   }
 
                   if (state is NotificationLoaded) {
                     return SliverToBoxAdapter(
-                      child: NotificationList(
-                        notifications: state.notifications,
-                        onRead: (id) => context.read<NotificationBloc>().add(
-                          MarkAsRead(id),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: NotificationList(
+                            notifications: state.notifications,
+                            onRead: (id) => context
+                                .read<NotificationBloc>()
+                                .add(MarkAsRead(id)),
+                          ),
                         ),
                       ),
                     );
@@ -74,27 +110,48 @@ class _NotificationPageState extends State<NotificationPage> {
 
                   if (state is NotificationFailed) {
                     return SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.notifications_paused,
-                            color: AppColors.lightGrey,
-                            size: 60,
-                          ),
-                          Divider(),
-                          const Text(
-                            'Failed',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              children: [
+                                const Icon(
+                                  Icons.notifications_paused_outlined,
+                                  color: AppColors.mediumGrey,
+                                  size: 44,
+                                ),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Notifications unavailable',
+                                  style: TextStyle(
+                                    color: AppColors.primaryBlack,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  state.message,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: AppColors.mediumGrey,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextButton.icon(
+                                  onPressed: () =>
+                                      context.read<NotificationBloc>().add(
+                                        LoadNotifications(0, selectedOption),
+                                      ),
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Try again'),
+                                ),
+                              ],
                             ),
                           ),
-                          const Text(
-                            'You currently have no notifications. We will notify you of the ticket changes.',
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   }

@@ -61,12 +61,16 @@ import 'package:marikina_market_mobile/features/tickets/domain/repositories/insp
 import 'package:marikina_market_mobile/features/tickets/domain/repositories/ticket_repository.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/get_fine_summary_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_inspection_list_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_community_service_progress_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ordinances_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ticket_detail_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ticket_list_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ticket_receipt_proof_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/save_inspection_ticket_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/search_vendor_by_code_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/search_vendor_by_stall_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/submit_community_service_log_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/submit_ticket_receipt_proof_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
 
@@ -188,9 +192,19 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
   sl.registerLazySingleton<TicketRepository>(() => TicketRepositoryImpl(sl()));
   sl.registerLazySingleton(() => LoadTicketListUseCase(sl()));
   sl.registerLazySingleton(() => LoadTicketDetailUseCase(sl()));
+  sl.registerLazySingleton(() => LoadTicketReceiptProofUseCase(sl()));
+  sl.registerLazySingleton(() => LoadCommunityServiceProgressUseCase(sl()));
+  sl.registerLazySingleton(() => SubmitTicketReceiptProofUseCase(sl()));
+  sl.registerLazySingleton(() => SubmitCommunityServiceLogUseCase(sl()));
   sl.registerFactory(
-    () =>
-        TicketBloc(loadTicketListUseCase: sl(), loadTicketDetailUseCase: sl()),
+    () => TicketBloc(
+      loadTicketListUseCase: sl(),
+      loadTicketDetailUseCase: sl(),
+      loadTicketReceiptProofUseCase: sl(),
+      loadCommunityServiceProgressUseCase: sl(),
+      submitTicketReceiptProofUseCase: sl(),
+      submitCommunityServiceLogUseCase: sl(),
+    ),
   );
 
   sl.registerLazySingleton<ProfileRemoteDataSource>(

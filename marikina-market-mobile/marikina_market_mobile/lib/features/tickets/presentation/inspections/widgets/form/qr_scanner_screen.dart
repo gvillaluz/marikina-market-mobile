@@ -4,14 +4,13 @@ import 'package:marikina_market_mobile/features/tickets/presentation/inspections
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_state.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/widgets/form/scanner_corner_pointer.dart';
+import 'package:marikina_market_mobile/core/utils/image_picker_util.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class QrScannerScreen extends StatefulWidget {
-  const QrScannerScreen({
-    super.key
-  });
+  const QrScannerScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => _QrScannerScreenState();
@@ -20,7 +19,7 @@ class QrScannerScreen extends StatefulWidget {
 class _QrScannerScreenState extends State<QrScannerScreen> {
   final MobileScannerController _controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.normal,
-    facing: CameraFacing.back
+    facing: CameraFacing.back,
   );
 
   @override
@@ -40,6 +39,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
   bool _isScanned = false;
   bool _multipleDetected = false;
+  bool _cameraPermissionNoticeShown = false;
 
   Rect _calculateScanWindow(Size screenSize) {
     final double left = (screenSize.width - _scanWindowSize) / 2;
@@ -65,7 +65,6 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
     final bloc = context.read<InspectionBloc>();
 
-
     bloc.add(SearchByCodeRequested(codeValue));
   }
 
@@ -84,17 +83,14 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            onPressed: () => Navigator.pop(context), 
-            icon: Icon(
-              Icons.arrow_back,
-              color: AppColors.primaryLight,
-            ),
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(Icons.arrow_back, color: AppColors.primaryLight),
           ),
           title: const Text(
             'Scan QR Code',
             style: TextStyle(
-              fontWeight: FontWeight.bold, 
-              color: AppColors.primaryLight
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryLight,
             ),
           ),
           backgroundColor: AppColors.primary,
@@ -124,47 +120,107 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final screenSize = Size(constraints.maxWidth, constraints.maxHeight);
+            final screenSize = Size(
+              constraints.maxWidth,
+              constraints.maxHeight,
+            );
             final scanWindow = _calculateScanWindow(screenSize);
-      
+
             return Container(
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlack
-              ),
+              decoration: BoxDecoration(color: AppColors.primaryBlack),
               child: Stack(
                 children: [
                   Positioned.fill(
-                  child: MobileScanner(
-                    scanWindow: scanWindow,
-                    controller: _controller,
-                    onDetect: _onDetect,
+                    child: MobileScanner(
+                      scanWindow: scanWindow,
+                      controller: _controller,
+                      onDetect: _onDetect,
+                      errorBuilder: (context, error) {
+                        if (error.errorCode ==
+                                MobileScannerErrorCode.permissionDenied &&
+                            !_cameraPermissionNoticeShown) {
+                          _cameraPermissionNoticeShown = true;
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Camera permission was denied. Enable it in your device settings to scan QR codes.',
+                                  ),
+                                ),
+                              );
+                          });
+                        }
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  error.errorCode ==
+                                          MobileScannerErrorCode
+                                              .permissionDenied
+                                      ? 'Camera permission is required to scan QR codes.'
+                                      : error.errorCode.message,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                if (error.errorCode ==
+                                    MobileScannerErrorCode
+                                        .permissionDenied) ...[
+                                  const SizedBox(height: 12),
+                                  TextButton.icon(
+                                    onPressed: () =>
+                                        ImagePickerUtil.openPermissionSettings(
+                                          context,
+                                          permission: 'camera',
+                                        ),
+                                    icon: const Icon(Icons.settings),
+                                    label: const Text('Open app settings'),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
                   Center(
                     child: SizedBox(
                       height: _scanWindowSize,
                       width: _scanWindowSize,
                       child: CustomPaint(
                         painter: ScannerCornersPainter(
-                          color: _multipleDetected ? AppColors.primaryRed : AppColors.primaryLight,
-                        strokeWidth: 5,
+                          color: _multipleDetected
+                              ? AppColors.primaryRed
+                              : AppColors.primaryLight,
+                          strokeWidth: 5,
                         ),
                       ),
                     ),
                   ),
-            
+
                   Positioned(
                     bottom: 50,
                     left: 0,
                     right: 0,
                     child: Center(
                       child: BlocBuilder<InspectionBloc, InspectionState>(
-                        builder:(context, state) {
+                        builder: (context, state) {
                           if (state is InspectionSearchError) {
                             return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.secondaryRed.withValues(alpha: .85),
+                                color: AppColors.secondaryRed.withValues(
+                                  alpha: .85,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -185,33 +241,40 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                           }
 
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               color: _multipleDetected
                                   ? Colors.red.withValues(alpha: .85)
-                                  : AppColors.primaryBlack.withValues(alpha: .30),
+                                  : AppColors.primaryBlack.withValues(
+                                      alpha: .30,
+                                    ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               _multipleDetected
-                                ? 'Multiple codes detected — move closer to isolate one'
-                                : 'Align QR code within the frame',
+                                  ? 'Multiple codes detected — move closer to isolate one'
+                                  : 'Align QR code within the frame',
                               style: TextStyle(
-                                color: _multipleDetected ? AppColors.primaryRed : AppColors.primaryLight,
+                                color: _multipleDetected
+                                    ? AppColors.primaryRed
+                                    : AppColors.primaryLight,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           );
                         },
-                      )
+                      ),
                     ),
                   ),
                 ],
               ),
             );
-          }
-        )
+          },
+        ),
       ),
     );
   }

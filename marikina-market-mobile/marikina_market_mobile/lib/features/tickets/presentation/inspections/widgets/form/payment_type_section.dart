@@ -18,7 +18,7 @@ class PaymentTypeSection extends StatefulWidget {
     required this.totalFineAmount,
     required this.onChangeType,
     required this.communityHrsController,
-    required this.communityHrsError
+    required this.communityHrsError,
   });
 
   @override
@@ -31,17 +31,17 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
   @override
   void initState() {
     super.initState();
-    _selectedType = widget.selectedPenaltyType;
+    _selectedType = widget.severity == Severity.high
+        ? PenaltyType.cashFine
+        : widget.selectedPenaltyType;
   }
 
   @override
   void didUpdateWidget(covariant PaymentTypeSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedPenaltyType != widget.selectedPenaltyType) {
-      setState(() {
-        _selectedType = widget.selectedPenaltyType;
-      });
-    }
+    _selectedType = widget.severity == Severity.high
+        ? PenaltyType.cashFine
+        : widget.selectedPenaltyType;
   }
 
   @override
@@ -53,17 +53,15 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
       children: [
         const Text(
           'How the violator pays',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
 
-        const SizedBox(height: 5,),
+        const SizedBox(height: 5),
 
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color:  AppColors.lightGrey, width: 0.8),
+            border: Border.all(color: AppColors.lightGrey, width: 0.8),
           ),
           child: Column(
             children: [
@@ -77,14 +75,14 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
                 value: PenaltyType.communityService,
                 title: 'Community service',
                 trailingText: '3 hrs',
-                disabled: isHighSeverity
+                disabled: isHighSeverity,
               ),
-              const Divider(height: 1, color:  AppColors.lightGrey),
+              const Divider(height: 1, color: AppColors.lightGrey),
 
               _buildOptionTile(
                 value: PenaltyType.bloodDonation,
                 title: 'Blood donation',
-                disabled: isHighSeverity
+                disabled: isHighSeverity,
               ),
             ],
           ),
@@ -97,129 +95,141 @@ class _PaymentTypeSectionState extends State<PaymentTypeSection> {
     required PenaltyType value,
     required String title,
     String? trailingText,
-    bool disabled = false
+    bool disabled = false,
   }) {
     final isSelected = _selectedType == value;
+    final textColor = disabled ? AppColors.mediumGrey : AppColors.primaryBlack;
 
     return InkWell(
       onTap: disabled
-        ? null
-        : () {
-            setState(() {
-              _selectedType = value;
-            });
-            widget.onChangeType(value);
-          },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            // Custom Radio Circle
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.mediumGrey,
-                  width: 2,
+          ? null
+          : () {
+              setState(() {
+                _selectedType = value;
+              });
+              widget.onChangeType(value);
+            },
+      child: Opacity(
+        opacity: disabled ? 0.55 : 1,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              // Custom Radio Circle
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: disabled
+                        ? AppColors.mediumGrey
+                        : isSelected
+                        ? AppColors.primary
+                        : AppColors.mediumGrey,
+                    width: 2,
+                  ),
                 ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
+                child: isSelected
+                    ? Center(
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
 
-            if (_selectedType == PenaltyType.communityService && value == PenaltyType.communityService) ... [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      ),
-                    ),
-                    Text(
-                      'hours(minimum of 3 hours)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: widget.communityHrsError != null
-                            ? AppColors.primaryRed
-                            : AppColors.mediumGrey,
-                      ),
-                    ),
-                    if (widget.communityHrsError != null) ...[
-                      const SizedBox(height: 2),
+              if (_selectedType == PenaltyType.communityService &&
+                  value == PenaltyType.communityService) ...[
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        widget.communityHrsError!,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.primaryRed,
-                          fontWeight: FontWeight.w500,
+                        title,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: textColor,
                         ),
                       ),
+                      Text(
+                        'hours(minimum of 3 hours)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: widget.communityHrsError != null
+                              ? AppColors.primaryRed
+                              : AppColors.mediumGrey,
+                        ),
+                      ),
+                      if (widget.communityHrsError != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.communityHrsError!,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.primaryRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              Row(
-                spacing: 10,
-                children: [
-                  SizedBox(
-                    height: 35,
-                    width: 50,
-                    child: TextField(
-                      controller: widget.communityHrsController,
-                      textAlignVertical: TextAlignVertical.center,
-                      textAlign: TextAlign.center,
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.zero,
+                Row(
+                  spacing: 10,
+                  children: [
+                    SizedBox(
+                      height: 35,
+                      width: 50,
+                      child: TextField(
+                        controller: widget.communityHrsController,
+                        enabled: !disabled,
+                        textAlignVertical: TextAlignVertical.center,
+                        textAlign: TextAlign.center,
+                        onTapOutside: (event) =>
+                            FocusScope.of(context).unfocus(),
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.zero,
 
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(
-                            color: widget.communityHrsError != null
-                                ? AppColors.primaryRed
-                                : AppColors.lightGrey,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide(
+                              color: widget.communityHrsError != null
+                                  ? AppColors.primaryRed
+                                  : AppColors.lightGrey,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Text(
-                    'hrs',
-                    style: const TextStyle(
-                      fontSize: 16,
+                    Text('hrs', style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ] else ...[
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                      color: textColor,
                     ),
                   ),
-                ],
-              )
-            ] else ...[
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

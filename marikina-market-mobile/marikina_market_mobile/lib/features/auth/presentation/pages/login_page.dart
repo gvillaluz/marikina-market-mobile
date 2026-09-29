@@ -14,33 +14,37 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthConnectionError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: AppColors.primaryRed,
-                    )
-                  );
-                }
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthConnectionError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: AppColors.primaryRed,
+                        ),
+                      );
+                    }
 
-                if (state is Unauthenticated) {
-                  if (state.sessionExpired) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Session expired. Please login again.'),
-                        backgroundColor: AppColors.primary, 
-                      )
-                    );
-                  }
-                }
-              },
-              child: const LoginCard(),
+                    if (state is Unauthenticated && state.sessionExpired) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Session expired. Please login again.'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                    }
+                  },
+                  child: const LoginCard(),
+                ),
+              ),
             ),
-          )
+          ),
         ),
-      )
+      ),
     );
   }
 }

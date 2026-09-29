@@ -37,100 +37,105 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: BlocListener<PasswordRecoveryBloc, PasswordRecoveryState>(
-              listener: (context, state) {
-                if (state is ResetPasswordSuccessfully &&
-                    state.result.success) {
-                  context.goNamed(Routes.loginName);
-                }
-              },
-              child: Container(
-                width: screenSize.width * 0.9,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.09),
-                      blurRadius: 15,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: BlocListener<PasswordRecoveryBloc, PasswordRecoveryState>(
+                  listener: (context, state) {
+                    if (state is ResetPasswordSuccessfully &&
+                        state.result.success) {
+                      context.goNamed(Routes.loginName);
+                    }
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const LoginCardHeader(),
-
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'CREATE NEW PASSWORD',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 20,
-                            ),
-                          ),
-                          const Text(
-                            'Your new password must be at least 8 characters and include a combination of letters and numbers',
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          ResetPasswordFields(
-                            newPasswordController: newPasswordController,
-                            confirmNewPasswordController:
-                                confirmNewPasswordController,
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          BlocBuilder<
-                            PasswordRecoveryBloc,
-                            PasswordRecoveryState
-                          >(
-                            builder: (context, state) {
-                              return Column(
-                                children: [
-                                  AuthBtn(
-                                    onPressed: () => _submit(context),
-                                    isLoading: state is ResetPasswordLoading,
-                                    label: 'Change Password',
-                                  ),
-
-                                  if (state is ResetPasswordSuccessfully &&
-                                      !state.result.success) ...[
-                                    const SizedBox(height: 10),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const LoginCardHeader(),
+                        Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Create a new password',
+                                style: TextStyle(
+                                  color: AppColors.primaryBlack,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Use at least 8 characters with a combination of letters and numbers.',
+                                style: TextStyle(
+                                  color: AppColors.mediumGrey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              ResetPasswordFields(
+                                newPasswordController: newPasswordController,
+                                confirmNewPasswordController:
+                                    confirmNewPasswordController,
+                              ),
+                              const SizedBox(height: 20),
+                              BlocBuilder<
+                                PasswordRecoveryBloc,
+                                PasswordRecoveryState
+                              >(
+                                builder: (context, state) {
+                                  return Column(
+                                    children: [
+                                      AuthBtn(
+                                        onPressed: () => _submit(context),
+                                        isLoading:
+                                            state is ResetPasswordLoading,
+                                        label: 'Change Password',
                                       ),
-                                      child: Text(
-                                        state.result.message,
-                                        style: TextStyle(
-                                          color: AppColors.primaryRed,
+                                      if (state is ResetPasswordSuccessfully &&
+                                          !state.result.success) ...[
+                                        const SizedBox(height: 12),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
+                                          child: Text(
+                                            state.result.message,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: AppColors.primaryRed,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              );
-                            },
+                                      ],
+                                    ],
+                                  );
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

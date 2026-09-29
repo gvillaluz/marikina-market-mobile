@@ -1,4 +1,5 @@
 import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/violation_summary_model.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/ordinance_category.dart';
@@ -29,6 +30,7 @@ class TicketDetailModel {
   final DateTime? dueDate;
   final double? totalFineAmount;
   final int? communityServiceHours;
+  final TicketStatus ticketStatus;
   final List<String>? evidenceUrls;
 
   const TicketDetailModel({
@@ -54,6 +56,7 @@ class TicketDetailModel {
     this.dueDate,
     this.totalFineAmount,
     this.communityServiceHours,
+    required this.ticketStatus,
     this.evidenceUrls,
   });
 
@@ -98,6 +101,7 @@ class TicketDetailModel {
           ? null
           : (json['total_fine_amount'] as num).toDouble(),
       communityServiceHours: (json['community_service_hours'] as num?)?.toInt(),
+      ticketStatus: TicketStatus.fromValue(json['status'] as String),
       evidenceUrls: json['ticket_evidences'] == null
           ? null
           : List<String>.from(json['ticket_evidences'] as List),
@@ -128,6 +132,7 @@ class TicketDetailModel {
       dueDate: dueDate,
       totalFineAmount: totalFineAmount,
       communityServiceHours: communityServiceHours,
+      ticketStatus: ticketStatus,
       evidenceUrls: evidenceUrls,
     );
   }

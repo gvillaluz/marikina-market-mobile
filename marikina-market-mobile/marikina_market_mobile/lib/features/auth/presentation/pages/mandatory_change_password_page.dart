@@ -14,31 +14,37 @@ class MandatoryChangePasswordPage extends StatelessWidget {
       child: Scaffold(
         body: Center(
           child: SingleChildScrollView(
-            child: BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthChangePasswordNetworkError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: AppColors.primaryRed,
-                    )
-                  );
-                }
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthChangePasswordNetworkError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: AppColors.primaryRed,
+                        ),
+                      );
+                    }
 
-                if (state is Authenticated) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Password successfully changed.'),
-                      backgroundColor: AppColors.primary,
-                    )
-                  );
-                }
-              },
-              child: const ChangePasswordCard(),
-            )
+                    if (state is Authenticated) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password successfully changed.'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                    }
+                  },
+                  child: const ChangePasswordCard(),
+                ),
+              ),
+            ),
           ),
         ),
-      )
+      ),
     );
   }
 }

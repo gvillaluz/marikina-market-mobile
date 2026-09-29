@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
@@ -37,37 +36,58 @@ class DashboardPage extends StatelessWidget {
           },
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
-            physics: AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const UserBanner(),
-
-                const SizedBox(height: 20),
-
-                AppPrimaryButton(
-                  label: 'New Inspection',
-                  iconData: Icons.add,
-                  onPressed: () => context.pushNamed(Routes.newInspectionName),
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Dashboard',
+                      style: TextStyle(
+                        color: AppColors.primaryBlack,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Your market activity at a glance.',
+                      style: TextStyle(
+                        color: AppColors.mediumGrey,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: const UserBanner(),
+                    ),
+                    const SizedBox(height: 20),
+                    AppPrimaryButton(
+                      label: 'New Inspection',
+                      iconData: Icons.add,
+                      onPressed: () =>
+                          context.pushNamed(Routes.newInspectionName),
+                    ),
+                    const SizedBox(height: 12),
+                    const ViewInspectionsBtn(),
+                    const SizedBox(height: 28),
+                    const Text(
+                      'This week’s overview',
+                      style: TextStyle(
+                        color: AppColors.primaryBlack,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const WeeklyOverviewSection(),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-
-                const SizedBox(height: 20),
-
-                const ViewInspectionsBtn(),
-
-                const SizedBox(height: 30),
-
-                const Text(
-                  'THIS WEEK\'S OVERVIEW',
-                  style: TextStyle(fontSize: 16, color: AppColors.primaryBlack),
-                ),
-
-                const SizedBox(height: 10),
-
-                const WeeklyOverviewSection(),
-
-                const SizedBox(height: 20),
-              ],
+              ),
             ),
           ),
         ),

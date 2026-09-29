@@ -1,4 +1,5 @@
 import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
+import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/violation_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/ordinance_category.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
@@ -28,6 +29,7 @@ class TicketDetail {
   final DateTime? dueDate;
   final double? totalFineAmount;
   final int? communityServiceHours;
+  final TicketStatus ticketStatus;
   final List<String>? evidenceUrls;
 
   const TicketDetail({
@@ -53,6 +55,7 @@ class TicketDetail {
     this.dueDate,
     this.totalFineAmount,
     this.communityServiceHours,
+    required this.ticketStatus,
     this.evidenceUrls,
   });
 }
