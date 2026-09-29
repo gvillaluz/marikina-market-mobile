@@ -428,7 +428,7 @@ class TicketDetailContent extends StatelessWidget {
             TicketSettlementSection(
               ticketId: ticket.ticketId,
               penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
-              ticketStatus: ticket.ticketStatus,
+              ticketStatus: ticket.ticketStatus!,
               requiredHours: ticket.communityServiceHours,
               receiptProof: receiptProof,
               isReceiptSubmitted: isReceiptSubmitted,

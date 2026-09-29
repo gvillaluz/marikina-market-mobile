@@ -30,7 +30,7 @@ class TicketDetailModel {
   final DateTime? dueDate;
   final double? totalFineAmount;
   final int? communityServiceHours;
-  final TicketStatus ticketStatus;
+  final TicketStatus? ticketStatus;
   final List<String>? evidenceUrls;
 
   const TicketDetailModel({
@@ -56,7 +56,7 @@ class TicketDetailModel {
     this.dueDate,
     this.totalFineAmount,
     this.communityServiceHours,
-    required this.ticketStatus,
+    this.ticketStatus,
     this.evidenceUrls,
   });
 
@@ -101,7 +101,9 @@ class TicketDetailModel {
           ? null
           : (json['total_fine_amount'] as num).toDouble(),
       communityServiceHours: (json['community_service_hours'] as num?)?.toInt(),
-      ticketStatus: TicketStatus.fromValue(json['status'] as String),
+      ticketStatus: json['status'] != null
+          ? TicketStatus.fromValue(json['status'] as String)
+          : null,
       evidenceUrls: json['ticket_evidences'] == null
           ? null
           : List<String>.from(json['ticket_evidences'] as List),

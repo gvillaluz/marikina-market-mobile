@@ -29,7 +29,7 @@ class TicketDetail {
   final DateTime? dueDate;
   final double? totalFineAmount;
   final int? communityServiceHours;
-  final TicketStatus ticketStatus;
+  final TicketStatus? ticketStatus;
   final List<String>? evidenceUrls;
 
   const TicketDetail({
@@ -55,7 +55,7 @@ class TicketDetail {
     this.dueDate,
     this.totalFineAmount,
     this.communityServiceHours,
-    required this.ticketStatus,
+    this.ticketStatus,
     this.evidenceUrls,
   });
 }
