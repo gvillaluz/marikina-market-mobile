@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/di/dependency_injection.dart';
+import 'package:marikina_market_mobile/core/router/route_args.dart';
 import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/features/auth/domain/entities/user.dart';
 import 'package:marikina_market_mobile/features/auth/presentation/bloc/auth_bloc.dart';
@@ -15,6 +16,11 @@ import 'package:marikina_market_mobile/features/layout/presentation/pages/root_s
 import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_event.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/pages/notification_page.dart';
+import 'package:marikina_market_mobile/features/password_recovery/presentation/bloc/password_recovery_bloc.dart';
+import 'package:marikina_market_mobile/features/password_recovery/presentation/pages/code_validation_page.dart';
+import 'package:marikina_market_mobile/features/password_recovery/presentation/pages/find_account_page.dart';
+import 'package:marikina_market_mobile/features/password_recovery/presentation/pages/forgot_password_option_page.dart';
+import 'package:marikina_market_mobile/features/password_recovery/presentation/pages/reset_password_page.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/pages/change_password_page.dart';
 import 'package:marikina_market_mobile/features/profile/presentation/pages/edit_profile_page.dart';
@@ -23,7 +29,6 @@ import 'package:marikina_market_mobile/features/splash/presentation/pages/splash
 import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_form_data.dart';
 import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/pages/add_new_inspection_page.dart';
@@ -64,6 +69,89 @@ final appRoutes = [
         );
       },
     ),
+  ),
+  GoRoute(
+    name: Routes.findAccountName,
+    path: Routes.findAccount,
+    pageBuilder: (context, state) => CustomTransitionPage(
+      key: state.pageKey,
+      child: BlocProvider(
+        create: (_) => sl<PasswordRecoveryBloc>(),
+        child: const FindAccountPage(),
+      ),
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: child,
+        );
+      },
+    ),
+  ),
+  GoRoute(
+    name: Routes.forgotPasswordOptionName,
+    path: Routes.forgotPasswordOption,
+    pageBuilder: (context, state) {
+      final extra = state.extra as ForgotPasswordOptionArgs;
+
+      return CustomTransitionPage(
+        key: state.pageKey,
+        child: BlocProvider(
+          create: (_) => sl<PasswordRecoveryBloc>(),
+          child: ForgotPasswordOptionPage(args: extra),
+        ),
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: child,
+          );
+        },
+      );
+    },
+  ),
+  GoRoute(
+    name: Routes.codeVerificationName,
+    path: Routes.codeVerification,
+    pageBuilder: (context, state) {
+      final extra = state.extra as CodeValidationArgs;
+      return CustomTransitionPage(
+        key: state.pageKey,
+        child: BlocProvider(
+          create: (_) => sl<PasswordRecoveryBloc>(),
+          child: CodeValidationPage(args: extra),
+        ),
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: child,
+          );
+        },
+      );
+    },
+  ),
+  GoRoute(
+    name: Routes.resetPasswordName,
+    path: Routes.resetPassword,
+    pageBuilder: (context, state) {
+      final extra = state.extra as ResetPasswordArgs;
+
+      return CustomTransitionPage(
+        key: state.pageKey,
+        child: BlocProvider(
+          create: (_) => sl<PasswordRecoveryBloc>(),
+          child: ResetPasswordPage(args: extra),
+        ),
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: child,
+          );
+        },
+      );
+    },
   ),
   GoRoute(
     name: Routes.splashName,
@@ -233,9 +321,7 @@ final _shellBranches = [
         path: Routes.inspetions,
         builder: (context, state) {
           return BlocProvider(
-            create: (_) =>
-                sl<InspectionBloc>()
-                  ..add(LoadInspectionTickets(0, ViolationType.warning)),
+            create: (_) => sl<InspectionBloc>()..add(LoadInspectionTickets()),
             child: const InspectionsPage(),
           );
         },

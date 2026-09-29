@@ -3,6 +3,7 @@ import 'package:marikina_market_mobile/features/tickets/data/models/violation_su
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/ordinance_category.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/vendor_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 
 class TicketDetailModel {
@@ -11,7 +12,9 @@ class TicketDetailModel {
   final int enforcerId;
   final int vendorId;
   final ViolationType violationType;
-  final String stallNumber;
+  final VendorType vendorType;
+  final String businessId;
+  final String? stallNumber;
   final String tradeName;
   final String lastName;
   final String firstName;
@@ -25,6 +28,7 @@ class TicketDetailModel {
   final PenaltyType? penaltyType;
   final DateTime? dueDate;
   final double? totalFineAmount;
+  final int? communityServiceHours;
   final List<String>? evidenceUrls;
 
   const TicketDetailModel({
@@ -33,7 +37,9 @@ class TicketDetailModel {
     required this.enforcerId,
     required this.vendorId,
     required this.violationType,
-    required this.stallNumber,
+    required this.vendorType,
+    required this.businessId,
+    this.stallNumber,
     required this.tradeName,
     required this.lastName,
     required this.firstName,
@@ -47,7 +53,8 @@ class TicketDetailModel {
     this.penaltyType,
     this.dueDate,
     this.totalFineAmount,
-    this.evidenceUrls
+    this.communityServiceHours,
+    this.evidenceUrls,
   });
 
   factory TicketDetailModel.fromJson(Map<String, dynamic> json) {
@@ -57,13 +64,20 @@ class TicketDetailModel {
       enforcerId: json['enforcer_id'] as int,
       vendorId: json['vendor_id'] as int,
       violationType: ViolationType.fromValue(json['type'] as String),
-      stallNumber: json['stall_number'] as String,
+      vendorType: VendorType.fromValue(json['vendor_type'] as String),
+      businessId: json['business_id'] as String,
+      stallNumber: json['stall_number'] != null
+          ? json['stall_number'] as String
+          : null,
       tradeName: json['business_name'] as String,
       lastName: json['last_name'] as String,
       firstName: json['first_name'] as String,
       address: json['address'] as String?,
       violations: (json['violations'] as List<dynamic>)
-          .map((item) => ViolationSummaryModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) =>
+                ViolationSummaryModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
       issuedAt: DateTime.parse(json['issued_at'] as String),
       marketSectionName: json['market_section_name'] as String,
@@ -83,6 +97,7 @@ class TicketDetailModel {
       totalFineAmount: json['total_fine_amount'] == null
           ? null
           : (json['total_fine_amount'] as num).toDouble(),
+      communityServiceHours: (json['community_service_hours'] as num?)?.toInt(),
       evidenceUrls: json['ticket_evidences'] == null
           ? null
           : List<String>.from(json['ticket_evidences'] as List),
@@ -96,6 +111,8 @@ class TicketDetailModel {
       enforcerId: enforcerId,
       vendorId: vendorId,
       violationType: violationType,
+      vendorType: vendorType,
+      businessId: businessId,
       stallNumber: stallNumber,
       tradeName: tradeName,
       lastName: lastName,
@@ -110,6 +127,7 @@ class TicketDetailModel {
       penaltyType: penaltyType,
       dueDate: dueDate,
       totalFineAmount: totalFineAmount,
+      communityServiceHours: communityServiceHours,
       evidenceUrls: evidenceUrls,
     );
   }

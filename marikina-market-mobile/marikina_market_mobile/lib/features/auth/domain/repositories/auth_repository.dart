@@ -10,7 +10,7 @@ abstract class AuthRepository {
     int userId,
     String currentPassword,
     String newPassword,
-    String confirmNewPassword
+    String confirmNewPassword,
   );
   Future<Result<Unit>> refreshTokens();
   Future<Result<Unit>> registerDeviceToken();

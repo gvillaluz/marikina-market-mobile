@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_event.dart';
@@ -15,9 +18,12 @@ class TicketsPage extends StatefulWidget {
 }
 
 class _TicketsPageState extends State<TicketsPage> {
+  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   TicketStatus _selectedStatus = TicketStatus.pending;
+
+  Timer? _debouncer;
 
   @override
   void initState() {
@@ -29,6 +35,8 @@ class _TicketsPageState extends State<TicketsPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
+    _debouncer?.cancel();
     super.dispose();
   }
 
@@ -46,20 +54,31 @@ class _TicketsPageState extends State<TicketsPage> {
       context.read<TicketBloc>().add(
         LoadTicketSummary(
           offset: state.ticketSummary.length,
-          status: _selectedStatus
-        )
+          status: _selectedStatus,
+        ),
       );
     }
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debouncer?.isActive ?? false) _debouncer!.cancel();
+
+    _debouncer = Timer(const Duration(milliseconds: 400), () {
+      context.read<TicketBloc>().add(
+        LoadTicketSummary(
+          search: _searchController.text.trim(),
+          offset: 0,
+          status: _selectedStatus,
+        ),
+      );
+    });
   }
 
   void _handleChangeStatus(TicketStatus status) {
     setState(() => _selectedStatus = status);
 
     context.read<TicketBloc>().add(
-      LoadTicketSummary(
-        offset: 0, 
-        status: status
-      ),
+      LoadTicketSummary(offset: 0, status: status),
     );
   }
 
@@ -68,7 +87,9 @@ class _TicketsPageState extends State<TicketsPage> {
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async {
-          context.read<TicketBloc>().add(LoadTicketSummary(offset: 0, status: _selectedStatus));
+          context.read<TicketBloc>().add(
+            LoadTicketSummary(offset: 0, status: _selectedStatus),
+          );
 
           await context.read<TicketBloc>().stream.firstWhere(
             (state) => state is TicketsLoaded || state is TicketError,
@@ -88,29 +109,40 @@ class _TicketsPageState extends State<TicketsPage> {
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
+                    TextField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search),
+                        hintText: 'Search',
+                        hintStyle: TextStyle(color: AppColors.lightGrey),
+                      ),
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                    ),
+                    const SizedBox(height: 10),
                     TicketFilterRow(
                       statusSelected: _selectedStatus,
                       onChange: (status) => _handleChangeStatus(status),
-                    )
-                  ])
+                    ),
+                  ]),
                 ),
               ),
               const TicketListSection(),
 
               SliverToBoxAdapter(
                 child: _isLoadingMore
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  : const SizedBox.shrink(),
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    : const SizedBox.shrink(),
               ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 20,),)
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

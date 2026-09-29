@@ -8,6 +8,18 @@ abstract class Routes {
   static const mandatoryChangePassword = '/mandatory/password';
   static const mandatoryChangePasswordName = 'mandatoryChangePassword';
 
+  static const findAccount = '/forgot-password/find-account';
+  static const findAccountName = 'findAccount';
+
+  static const forgotPasswordOption = '/forgot-password/options';
+  static const forgotPasswordOptionName = 'forgotPasswordOption';
+
+  static const codeVerification = '/forgot-password/code-verification';
+  static const codeVerificationName = 'codeVerification';
+
+  static const resetPassword = '/forgot-password/reset-password';
+  static const resetPasswordName = 'resetPassword';
+
   static const dashboard = '/dashboard';
   static const dashboardName = 'dashboard';
 

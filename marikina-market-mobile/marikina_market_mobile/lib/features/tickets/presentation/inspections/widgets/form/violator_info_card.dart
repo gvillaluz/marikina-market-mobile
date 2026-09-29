@@ -25,18 +25,18 @@ class ViolatorInfoCard extends StatelessWidget {
     // required this.middleNameController,
     required this.onVendorSelected,
     required this.errorMessage,
-    super.key
+    super.key,
   });
 
   Future<void> _handleQrScan(BuildContext context) async {
     final vendor = await Navigator.push(
-      context, 
+      context,
       MaterialPageRoute(
         builder: (context) => BlocProvider(
           create: (_) => sl<InspectionBloc>(),
           child: const QrScannerScreen(),
-        )
-      )
+        ),
+      ),
     );
 
     if (vendor == null) return;
@@ -46,14 +46,14 @@ class ViolatorInfoCard extends StatelessWidget {
 
   Future<void> _handleSearchById(BuildContext context) async {
     final selectedVendor = await showModalBottomSheet(
-      context: context, 
+      context: context,
       enableDrag: true,
       showDragHandle: true,
       isScrollControlled: true,
       builder: (context) => BlocProvider(
         create: (_) => sl<InspectionBloc>(),
-        child: SearchByStallBottomSheet(),
-      )
+        child: SearchByBusinessIdBottomSheet(),
+      ),
     );
 
     if (selectedVendor == null) return;
@@ -72,48 +72,44 @@ class ViolatorInfoCard extends StatelessWidget {
             color: AppColors.tertiary,
             borderRadius: BorderRadius.circular(50),
           ),
-          child: Icon(
-            Icons.search,
-            color: AppColors.primary,
-            size: 40,
-          ),
+          child: Icon(Icons.search, color: AppColors.primary, size: 40),
         ),
 
-        const SizedBox(height: 10,),
+        const SizedBox(height: 10),
 
         const Text(
           'Find Vendor',
           style: TextStyle(
             color: AppColors.primary,
             fontSize: 20,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 5,),
+        const SizedBox(height: 5),
         const Text(
           'Scan QR code or search vendor by stall number to begin inspection',
           textAlign: TextAlign.center,
         ),
-        
-        const SizedBox(height: 20,),
+
+        const SizedBox(height: 20),
 
         Row(
           spacing: 10,
           children: [
             AutoFillBtn(
-              label: 'Scan QR Code', 
-              icon: Icons.qr_code_scanner, 
-              onPressed: () => _handleQrScan(context)
+              label: 'Scan QR Code',
+              icon: Icons.qr_code_scanner,
+              onPressed: () => _handleQrScan(context),
             ),
             AutoFillBtn(
-              label: 'Search by ID', 
-              icon: Icons.search, 
-              onPressed: () => _handleSearchById(context)
-            )
+              label: 'Search by ID',
+              icon: Icons.search,
+              onPressed: () => _handleSearchById(context),
+            ),
           ],
         ),
 
-        const SizedBox(height: 20,),
+        const SizedBox(height: 20),
 
         // Row(
         //   spacing: 10,
@@ -136,34 +132,30 @@ class ViolatorInfoCard extends StatelessWidget {
         //     )
         //   ],
         // ),
-
         const Divider(),
 
-        const SizedBox(height: 20,),
+        const SizedBox(height: 20),
 
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: AppColors.tertiary.withValues(alpha: .60)
+            color: AppColors.tertiary.withValues(alpha: .60),
           ),
           child: const ListTile(
-            leading: Icon(
-              Icons.info_outline_rounded,
-              color: AppColors.primary,
-            ),
+            leading: Icon(Icons.info_outline_rounded, color: AppColors.primary),
             title: Text(
               'Vendor information is required',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary
+                color: AppColors.primary,
               ),
             ),
             subtitle: Text(
-              'Please find the vendor to view details and create a record.'
+              'Please find the vendor to view details and create a record.',
             ),
           ),
-        )
+        ),
 
         // if (errorMessage != null) ...[
         //   ErrorBanner(
@@ -174,10 +166,10 @@ class ViolatorInfoCard extends StatelessWidget {
         // ],
 
         // ViolatorInfoFields(
-        //   stallNumberController: stallNumberController, 
-        //   tradeNameController: tradeNameController, 
-        //   lastNameController: lastNameController, 
-        //   firstNameController: firstNameController, 
+        //   stallNumberController: stallNumberController,
+        //   tradeNameController: tradeNameController,
+        //   lastNameController: lastNameController,
+        //   firstNameController: firstNameController,
         //   middleNameController: middleNameController
         // ),
       ],

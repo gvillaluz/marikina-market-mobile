@@ -7,6 +7,8 @@ class TicketInitial extends TicketState {}
 
 class TicketLoading extends TicketState {}
 
+class TicketSilentLoading extends TicketState {}
+
 class TicketsLoaded extends TicketState {
   final List<TicketSummary> ticketSummary;
   final bool hasMore;

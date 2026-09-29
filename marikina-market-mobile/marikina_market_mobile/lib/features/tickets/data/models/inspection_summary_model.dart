@@ -1,6 +1,7 @@
 import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_ticket_summary.dart';
 import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/vendor_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 
 class InspectionSummaryModel {
@@ -14,7 +15,9 @@ class InspectionSummaryModel {
   final int marketSectionId;
   final String marketSection;
   final int enforcerId;
-  final String stallNumber;
+  final VendorType vendorType;
+  final String businessId;
+  final String? stallNumber;
   final TicketStatus? status;
   final Severity? severity;
   final List<String> ordinance;
@@ -33,7 +36,9 @@ class InspectionSummaryModel {
     required this.marketSectionId,
     required this.marketSection,
     required this.enforcerId,
-    required this.stallNumber,
+    required this.businessId,
+    required this.vendorType,
+    this.stallNumber,
     this.status,
     required this.severity,
     required this.ordinance,
@@ -56,7 +61,11 @@ class InspectionSummaryModel {
       marketSectionId: json['market_section_id'] as int,
       marketSection: json['market_section_name'] as String,
       enforcerId: json['enforcer_id'] as int,
-      stallNumber: json['stall_number'] as String,
+      vendorType: VendorType.fromValue(json['vendor_type'] as String),
+      businessId: json['business_id'] as String,
+      stallNumber: json['stall_number'] != null
+          ? json['stall_number'] as String
+          : null,
       status: json['status'] == null
           ? null
           : TicketStatus.fromValue(json['status'] as String),
@@ -84,6 +93,8 @@ class InspectionSummaryModel {
       marketSectionId: entity.marketSectionId,
       marketSection: entity.marketSection,
       enforcerId: entity.enforcerId,
+      vendorType: entity.vendorType,
+      businessId: entity.businessId,
       stallNumber: entity.stallNumber,
       status: entity.status,
       severity: entity.severity,
@@ -106,6 +117,8 @@ class InspectionSummaryModel {
       marketSectionId: marketSectionId,
       marketSection: marketSection,
       enforcerId: enforcerId,
+      vendorType: vendorType,
+      businessId: businessId,
       stallNumber: stallNumber,
       status: status,
       severity: severity,

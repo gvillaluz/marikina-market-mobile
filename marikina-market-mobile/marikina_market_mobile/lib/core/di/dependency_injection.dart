@@ -17,6 +17,10 @@ import 'package:marikina_market_mobile/features/auth/domain/repositories/auth_re
 import 'package:marikina_market_mobile/features/auth/domain/services/token_service.dart';
 import 'package:marikina_market_mobile/features/auth/domain/services/token_service_impl.dart';
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/check_auth_status_use_case.dart';
+import 'package:marikina_market_mobile/features/password_recovery/data/data_sources/password_recovery_remote_data_source.dart';
+import 'package:marikina_market_mobile/features/password_recovery/data/repositories/password_recovery_repository_impl.dart';
+import 'package:marikina_market_mobile/features/password_recovery/domain/repositories/password_recovery_repository.dart';
+import 'package:marikina_market_mobile/features/password_recovery/domain/use_cases/find_account_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/login_user_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/logout_user_use_case.dart';
 import 'package:marikina_market_mobile/features/auth/domain/use_cases/mandatory_change_password_use_case.dart';
@@ -35,6 +39,10 @@ import 'package:marikina_market_mobile/features/notification/domain/repositories
 import 'package:marikina_market_mobile/features/notification/domain/use_cases/load_notifications_use_case.dart';
 import 'package:marikina_market_mobile/features/notification/domain/use_cases/mark_as_read_use_case.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_bloc.dart';
+import 'package:marikina_market_mobile/features/password_recovery/domain/use_cases/reset_password_use_case.dart';
+import 'package:marikina_market_mobile/features/password_recovery/domain/use_cases/send_otp_use_case.dart';
+import 'package:marikina_market_mobile/features/password_recovery/domain/use_cases/verify_code_use_case.dart';
+import 'package:marikina_market_mobile/features/password_recovery/presentation/bloc/password_recovery_bloc.dart';
 import 'package:marikina_market_mobile/features/profile/data/data_sources/profile_remote_data_source.dart';
 import 'package:marikina_market_mobile/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:marikina_market_mobile/features/profile/domain/repositories/profile_repository.dart';
@@ -109,6 +117,25 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
       mandatoryChangePasswordUseCase: sl(),
       refreshTokensUseCase: sl(),
       registerDeviceTokenUseCase: sl(),
+    ),
+  );
+
+  sl.registerLazySingleton<PasswordRecoveryRemoteDataSource>(
+    () => PasswordRecoveryRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<PasswordRecoveryRepository>(
+    () => PasswordRecoveryRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => FindAccountUseCase(sl()));
+  sl.registerLazySingleton(() => SendOtpUseCase(sl()));
+  sl.registerLazySingleton(() => VerifyCodeUseCase(sl()));
+  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
+  sl.registerFactory<PasswordRecoveryBloc>(
+    () => PasswordRecoveryBloc(
+      findAccountUseCase: sl(),
+      sendOtpUseCase: sl(),
+      verifyOtpUseCase: sl(),
+      resetPasswordUseCase: sl(),
     ),
   );
 

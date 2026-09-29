@@ -36,7 +36,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.logoutUserUseCase,
     required this.mandatoryChangePasswordUseCase,
     required this.refreshTokensUseCase,
-    required this.registerDeviceTokenUseCase
+    required this.registerDeviceTokenUseCase,
   }) : super(AuthInitial()) {
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<LoginSubmitted>(_onLoginSubmitted);
@@ -49,16 +49,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (status == ConnectivityStatus.online) add(RefreshTokens());
     });
 
-    _tokenCheckTimer = Timer.periodic(
-      const Duration(minutes: 14),
-      (_) {
-        if (connectivityCubit.state == ConnectivityStatus.online) {
-          add(RefreshTokens());
-        }
+    _tokenCheckTimer = Timer.periodic(const Duration(minutes: 14), (_) {
+      if (connectivityCubit.state == ConnectivityStatus.online) {
+        add(RefreshTokens());
       }
-    );
+    });
 
-    
     add(CheckAuthStatus());
   }
 
@@ -69,7 +65,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return super.close();
   }
 
-  Future<void> _onCheckAuthStatus(CheckAuthStatus event, Emitter<AuthState> emit) async {
+  Future<void> _onCheckAuthStatus(
+    CheckAuthStatus event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
 
     final result = await checkAuthStatusUseCase();
@@ -87,30 +86,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLoginSubmitted(LoginSubmitted event, Emitter<AuthState> emit) async {
+  Future<void> _onLoginSubmitted(
+    LoginSubmitted event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoginLoading());
 
     final result = await loginUserUseCase(
-      LoginParams(
-        username: event.username, 
-        password: event.password
-      )
+      LoginParams(username: event.username, password: event.password),
     );
 
     switch (result) {
-      case ResultFailure(failure: UnauthorizedFailure(: final message) ||
-            ValidationFailure(: final message)):
+      case ResultFailure(
+        failure: UnauthorizedFailure(:final message) ||
+            ValidationFailure(:final message),
+      ):
         emit(AuthInvalidCredentials(message));
 
-      case ResultFailure(failure: TokenValidationFailure(: final message)):
+      case ResultFailure(failure: TokenValidationFailure(:final message)):
         debugPrint(message);
         emit(Unauthenticated(false));
 
-      case ResultFailure(failure: NetworkFailure(: final message) ||
-          ServerFailure(: final message) ||
-          CacheFailure(: final message) ||
-          ConflictFailure(: final message) ||
-          DuplicateWarningFailure(: final message)): 
+      case ResultFailure(
+        failure: NetworkFailure(:final message) ||
+            ServerFailure(:final message) ||
+            CacheFailure(:final message) ||
+            ConflictFailure(:final message) ||
+            DuplicateWarningFailure(:final message),
+      ):
         emit(AuthConnectionError(message));
 
       case Success(data: final user):
@@ -119,16 +122,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onChangePasswordSubmitted(ChangePasswordSubmitted event, Emitter<AuthState> emit) async {
+  Future<void> _onChangePasswordSubmitted(
+    ChangePasswordSubmitted event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthChangePasswordLoading());
 
     final result = await mandatoryChangePasswordUseCase(
       MandatoryChangePasswordParams(
-        userId: event.userId, 
-        currentPassword: event.currentPassword, 
-        newPassword: event.newPassword, 
-        confirmNewPassword: event.confirmNewPassword
-      )
+        userId: event.userId,
+        currentPassword: event.currentPassword,
+        newPassword: event.newPassword,
+        confirmNewPassword: event.confirmNewPassword,
+      ),
     );
 
     switch (result) {
@@ -148,9 +154,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final logoutResult = await logoutUserUseCase();
 
     switch (logoutResult) {
-      case ResultFailure(failure: NetworkFailure(: final message) ||
-            ServerFailure(: final message) ||
-            CacheFailure(: final message)): 
+      case ResultFailure(
+        failure: NetworkFailure(:final message) ||
+            ServerFailure(:final message) ||
+            CacheFailure(:final message),
+      ):
         emit(AuthConnectionError(message));
 
       default:
@@ -158,9 +166,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onUserUpdated(UserUpdated event, Emitter<AuthState> emit) async => emit(Authenticated(user: event.user));
+  Future<void> _onUserUpdated(
+    UserUpdated event,
+    Emitter<AuthState> emit,
+  ) async => emit(Authenticated(user: event.user));
 
-  Future<void> _onRefreshTokens(RefreshTokens event, Emitter<AuthState> emit) async {
+  Future<void> _onRefreshTokens(
+    RefreshTokens event,
+    Emitter<AuthState> emit,
+  ) async {
     if (state is! Authenticated) return;
 
     final result = await refreshTokensUseCase();

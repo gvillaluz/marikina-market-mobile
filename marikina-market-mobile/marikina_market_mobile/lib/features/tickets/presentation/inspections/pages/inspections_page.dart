@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/core/shared/presentation/widgets/app_primary_btn.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
@@ -18,9 +21,12 @@ class InspectionsPage extends StatefulWidget {
 }
 
 class _InspectionPageState extends State<InspectionsPage> {
+  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
   ViolationType _selectedViolationType = ViolationType.warning;
+
+  Timer? _debouncer;
 
   @override
   void initState() {
@@ -32,6 +38,8 @@ class _InspectionPageState extends State<InspectionsPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
+    _debouncer?.cancel();
     super.dispose();
   }
 
@@ -47,16 +55,38 @@ class _InspectionPageState extends State<InspectionsPage> {
         state.hasMore) {
       setState(() => _isLoadingMore = true);
       context.read<InspectionBloc>().add(
-        LoadInspectionTickets(state.ticketSummary.length, _selectedViolationType),
+        LoadInspectionTickets(
+          search: _searchController.text.trim(),
+          offset: state.ticketSummary.length,
+          type: _selectedViolationType,
+        ),
       );
     }
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debouncer?.isActive ?? false) _debouncer!.cancel();
+
+    _debouncer = Timer(const Duration(milliseconds: 400), () {
+      context.read<InspectionBloc>().add(
+        LoadInspectionTickets(
+          search: _searchController.text.trim(),
+          offset: 0,
+          type: _selectedViolationType,
+        ),
+      );
+    });
   }
 
   void _handleChangeType(ViolationType type) {
     setState(() => _selectedViolationType = type);
 
     context.read<InspectionBloc>().add(
-      LoadInspectionTickets(0, type),
+      LoadInspectionTickets(
+        search: _searchController.text.trim(),
+        offset: 0,
+        type: type,
+      ),
     );
   }
 
@@ -64,11 +94,19 @@ class _InspectionPageState extends State<InspectionsPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () async {
-          context.read<InspectionBloc>().add(LoadInspectionTickets(0, _selectedViolationType));
+          context.read<InspectionBloc>().add(
+            LoadInspectionTickets(
+              search: _searchController.text.trim(),
+              offset: 0,
+              type: _selectedViolationType,
+            ),
+          );
 
           await context.read<InspectionBloc>().stream.firstWhere(
-            (state) => state is InspectionTicketsLoaded || state is InspectionError,
+            (state) =>
+                state is InspectionTicketsLoaded || state is InspectionError,
           );
         },
         child: BlocListener<InspectionBloc, InspectionState>(
@@ -82,25 +120,107 @@ class _InspectionPageState extends State<InspectionsPage> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.all(20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    AppPrimaryButton(
-                      label: 'New Inspection',
-                      iconData: Icons.add,
-                      onPressed: () => context.pushNamed(Routes.newInspectionName),
-                    ),
-                    const SizedBox(height: 10),
-                    FilterRow(
-                      typeSelected: _selectedViolationType,
-                      onChange: (type) => _handleChangeType(type),
-                    ),
-                  ])
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Inspections',
+                        style: TextStyle(
+                          color: AppColors.primaryBlack,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Review and manage issued inspection tickets.',
+                        style: TextStyle(
+                          color: AppColors.mediumGrey,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      AppPrimaryButton(
+                        label: 'New Inspection',
+                        iconData: Icons.add,
+                        onPressed: () =>
+                            context.pushNamed(Routes.newInspectionName),
+                      ),
+                      const SizedBox(height: 18),
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _searchController,
+                        builder: (context, value, child) {
+                          return TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.search,
+                                color: AppColors.mediumGrey,
+                              ),
+                              suffixIcon: value.text.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      tooltip: 'Clear search',
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        _onSearchChanged('');
+                                      },
+                                      icon: const Icon(Icons.close),
+                                    ),
+                              hintText: 'Search inspections',
+                              hintStyle: const TextStyle(
+                                color: AppColors.mediumGrey,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: AppColors.lightGrey.withValues(
+                                    alpha: 0.65,
+                                  ),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                            onTapOutside: (event) =>
+                                FocusScope.of(context).unfocus(),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                      FilterRow(
+                        typeSelected: _selectedViolationType,
+                        onChange: _handleChangeType,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              
-              const InspectionListSection(),
-          
+
+              InspectionListSection(
+                onRetry: () => context.read<InspectionBloc>().add(
+                  LoadInspectionTickets(
+                    search: _searchController.text.trim(),
+                    offset: 0,
+                    type: _selectedViolationType,
+                  ),
+                ),
+              ),
+
               SliverToBoxAdapter(
                 child: _isLoadingMore
                     ? const Padding(
@@ -109,12 +229,12 @@ class _InspectionPageState extends State<InspectionsPage> {
                       )
                     : const SizedBox.shrink(),
               ),
-          
-              const SliverToBoxAdapter(child: SizedBox(height: 20,),)
+
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

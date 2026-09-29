@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
@@ -43,9 +41,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
     });
   }
 
-  bool get _hasPhoto =>
-      widget.profileUrl != null && widget.profileUrl!.isNotEmpty;
-
   @override
   Widget build(BuildContext context) {
     Future<void> changeProfilePicture() async {
@@ -75,26 +70,14 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
           ),
           child: CircleAvatar(
             radius: 40,
-            child: _hasPhoto
+            child: _cachedAvatar != null
                 ? ClipOval(
-                    child: CachedNetworkImage(
-                      imageUrl: widget.profileUrl!,
-                      cacheManager: AvatarCacheManager.instance,
+                    child: Image.file(
+                      _cachedAvatar!,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          const CircularProgressIndicator(strokeWidth: 2.5),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.person, size: 40),
                     ),
-                  )
-                : _cachedAvatar != null
-                ? Image.file(
-                    _cachedAvatar!,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
                   )
                 : const Icon(Icons.person, size: 40),
           ),
@@ -115,11 +98,11 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
                     SizedBox(width: 5),
                     Icon(Icons.camera_alt, size: 20, color: AppColors.primary),
                     SizedBox(width: 10),
-                    Text(_hasPhoto ? 'Change Photo' : 'Add Photo'),
+                    Text(_cachedAvatar != null ? 'Change Photo' : 'Add Photo'),
                   ],
                 ),
               ),
-              if (_hasPhoto)
+              if (_cachedAvatar != null)
                 const PopupMenuItem(
                   value: AvatarAction.removePhoto,
                   child: Row(

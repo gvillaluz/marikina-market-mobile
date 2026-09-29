@@ -10,9 +10,14 @@ class LoadOrdinances extends InspectionEvent {}
 class LoadOrdinanceSelection extends InspectionEvent {}
 
 class LoadInspectionTickets extends InspectionEvent {
+  final String search;
   final int offset;
   final ViolationType type;
-  LoadInspectionTickets(this.offset, this.type);
+  LoadInspectionTickets({
+    this.search = '',
+    this.offset = 0,
+    this.type = ViolationType.warning,
+  });
 }
 
 class SearchByCodeRequested extends InspectionEvent {
@@ -28,10 +33,7 @@ class SearchByStallNumberRequested extends InspectionEvent {
 class FineSummaryRequested extends InspectionEvent {
   final List<int> ordinanceIds;
   final int? vendorId;
-  FineSummaryRequested(
-    this.ordinanceIds,
-    this.vendorId
-  );
+  FineSummaryRequested(this.ordinanceIds, this.vendorId);
 }
 
 class NewTicketSubmitted extends InspectionEvent {
@@ -43,7 +45,15 @@ class NewTicketSubmitted extends InspectionEvent {
   final String description;
   final List<XFile> evidences;
 
-  NewTicketSubmitted({required this.vendorId, required this.enforcerId, required this.ticketType, required this.ordinanceIds, required this.placeOfApprehension, required this.description, required this.evidences});
+  NewTicketSubmitted({
+    required this.vendorId,
+    required this.enforcerId,
+    required this.ticketType,
+    required this.ordinanceIds,
+    required this.placeOfApprehension,
+    required this.description,
+    required this.evidences,
+  });
 }
 
 class NewWarningSubmitted extends InspectionEvent {
@@ -54,7 +64,14 @@ class NewWarningSubmitted extends InspectionEvent {
   final String placeOfApprehension;
   final String description;
 
-  NewWarningSubmitted({required this.vendorId, required this.enforcerId, required this.ticketType, required this.ordinanceId, required this.placeOfApprehension, required this.description});
+  NewWarningSubmitted({
+    required this.vendorId,
+    required this.enforcerId,
+    required this.ticketType,
+    required this.ordinanceId,
+    required this.placeOfApprehension,
+    required this.description,
+  });
 }
 
 class NewInspectionSubmitted extends InspectionEvent {
@@ -69,5 +86,16 @@ class NewInspectionSubmitted extends InspectionEvent {
   final List<OrdinanceCategory> primaryCategory;
   final List<XFile>? evidences;
 
-  NewInspectionSubmitted({required this.vendorId, required this.enforcerId, required this.marketSectionId, required this.ticketType, required this.ordinanceIds, required this.penaltyType, required this.communityServiceHours, required this.description, required this.primaryCategory, required this.evidences});
+  NewInspectionSubmitted({
+    required this.vendorId,
+    required this.enforcerId,
+    required this.marketSectionId,
+    required this.ticketType,
+    required this.ordinanceIds,
+    required this.penaltyType,
+    required this.communityServiceHours,
+    required this.description,
+    required this.primaryCategory,
+    required this.evidences,
+  });
 }

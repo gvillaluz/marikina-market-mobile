@@ -8,7 +8,11 @@ class LoadTicketListUseCase {
   final TicketRepository _repository;
   LoadTicketListUseCase(this._repository);
 
-  Future<Result<PageResult<TicketSummary>>> call(int offset, TicketStatus status) async {
-    return await _repository.loadTickets(offset, status);
+  Future<Result<PageResult<TicketSummary>>> call(
+    String search,
+    int offset,
+    TicketStatus status,
+  ) async {
+    return await _repository.loadTickets(search, offset, status);
   }
 }

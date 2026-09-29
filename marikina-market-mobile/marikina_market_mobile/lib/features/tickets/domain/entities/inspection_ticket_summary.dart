@@ -1,5 +1,6 @@
 import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/vendor_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 
 class InspectionTicketSummary {
@@ -13,7 +14,9 @@ class InspectionTicketSummary {
   final int marketSectionId;
   final String marketSection;
   final int enforcerId;
-  final String stallNumber;
+  final VendorType vendorType;
+  final String businessId;
+  final String? stallNumber;
   final TicketStatus? status;
   final Severity? severity;
   final List<String> ordinance;
@@ -32,6 +35,8 @@ class InspectionTicketSummary {
     required this.marketSectionId,
     required this.marketSection,
     required this.enforcerId,
+    required this.vendorType,
+    required this.businessId,
     required this.stallNumber,
     this.status,
     required this.severity,

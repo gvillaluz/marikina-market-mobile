@@ -2,6 +2,7 @@ import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/violation_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/ordinance_category.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/vendor_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 
 class TicketDetail {
@@ -10,7 +11,9 @@ class TicketDetail {
   final int enforcerId;
   final int vendorId;
   final ViolationType violationType;
-  final String stallNumber;
+  final VendorType vendorType;
+  final String businessId;
+  final String? stallNumber;
   final String tradeName;
   final String lastName;
   final String firstName;
@@ -24,6 +27,7 @@ class TicketDetail {
   final PenaltyType? penaltyType;
   final DateTime? dueDate;
   final double? totalFineAmount;
+  final int? communityServiceHours;
   final List<String>? evidenceUrls;
 
   const TicketDetail({
@@ -32,7 +36,9 @@ class TicketDetail {
     required this.enforcerId,
     required this.vendorId,
     required this.violationType,
-    required this.stallNumber,
+    required this.vendorType,
+    required this.businessId,
+    this.stallNumber,
     required this.tradeName,
     required this.lastName,
     required this.firstName,
@@ -46,6 +52,7 @@ class TicketDetail {
     this.penaltyType,
     this.dueDate,
     this.totalFineAmount,
-    this.evidenceUrls
+    this.communityServiceHours,
+    this.evidenceUrls,
   });
 }

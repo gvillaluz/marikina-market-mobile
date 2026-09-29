@@ -21,11 +21,13 @@ class InspectionRepositoryImpl implements InspectionRepository {
 
   @override
   Future<Result<PageResult<InspectionTicketSummary>>> loadInspections(
+    String search,
     int offset,
     ViolationType type,
   ) async {
     try {
       final inspectionModels = await remoteDataSource.loadInspections(
+        search,
         offset,
         type,
       );
@@ -58,10 +60,11 @@ class InspectionRepositoryImpl implements InspectionRepository {
   Future<Result<List<Ordinance>>> loadOrdinances() async {
     try {
       final localOrdinanceModels = await localDataSource.getCacheOrdinances();
-      if (localOrdinanceModels.isNotEmpty)
+      if (localOrdinanceModels.isNotEmpty) {
         return Result.success(
           localOrdinanceModels.map((model) => model.toEntity()).toList(),
         );
+      }
 
       final ordinanceModels = await remoteDataSource.getOrdinances();
       await localDataSource.saveOrdinances(

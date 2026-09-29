@@ -10,6 +10,7 @@ import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_t
 
 abstract class InspectionRepository {
   Future<Result<PageResult<InspectionTicketSummary>>> loadInspections(
+    String search,
     int offset,
     ViolationType type,
   );

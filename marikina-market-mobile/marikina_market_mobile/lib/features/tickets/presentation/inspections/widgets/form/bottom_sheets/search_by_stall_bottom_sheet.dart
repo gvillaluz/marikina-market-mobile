@@ -8,16 +8,15 @@ import 'package:marikina_market_mobile/features/tickets/presentation/inspections
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_state.dart';
 
-class SearchByStallBottomSheet extends StatefulWidget {
-  const SearchByStallBottomSheet({
-    super.key
-  });
+class SearchByBusinessIdBottomSheet extends StatefulWidget {
+  const SearchByBusinessIdBottomSheet({super.key});
 
   @override
-  State<StatefulWidget> createState() => _SearchByStallBottomSheetState();
+  State<StatefulWidget> createState() => _SearchByBusinessIdBottomSheetState();
 }
 
-class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
+class _SearchByBusinessIdBottomSheetState
+    extends State<SearchByBusinessIdBottomSheet> {
   Timer? _debouncer;
   int? selectedVendor;
   String? _errorMessage;
@@ -46,7 +45,7 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<InspectionBloc, InspectionState>(
-      listener:(context, state) {
+      listener: (context, state) {
         if (state is InspectionSearchError) {
           setState(() {
             _errorMessage = state.error;
@@ -69,63 +68,57 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Search by Stall Number',
+                    'Search by Business ID',
                     style: TextStyle(
                       color: AppColors.primary,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 5,),
+                  const SizedBox(height: 5),
                   TextField(
                     onChanged: _onSearchChanged,
                     onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                    decoration: InputDecoration(
-                      hintText: 'Enter stall number'
-                    ),
+                    decoration: InputDecoration(hintText: 'Enter stall number'),
                   ),
-                  const SizedBox(height: 10,),
+                  const SizedBox(height: 10),
 
                   if (_errorMessage != null) ...[
                     Text(
                       _errorMessage!,
-                      style: TextStyle(
-                        color: AppColors.primaryRed
-                      ),
+                      style: TextStyle(color: AppColors.primaryRed),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 10,)
+                    const SizedBox(height: 10),
                   ],
-        
+
                   const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 5,
                     children: [
-                      SizedBox(width: 5,),
-                      Icon(
-                        Icons.info,
-                        color: AppColors.mediumGrey,
-                        size: 20,
-                      ),
+                      SizedBox(width: 5),
+                      Icon(Icons.info, color: AppColors.mediumGrey, size: 20),
                       Expanded(
                         child: Text(
-                          'Stall number can be found in the business permit document.',
+                          'Business ID can be found in the business permit document.',
                           style: TextStyle(
                             color: AppColors.mediumGrey,
-                            fontSize: 13
+                            fontSize: 13,
                           ),
                           softWrap: true,
                         ),
-                      )
+                      ),
                     ],
                   ),
-        
+
                   Expanded(
                     child: BlocBuilder<InspectionBloc, InspectionState>(
-                      builder:(context, state) {
+                      builder: (context, state) {
                         if (state is InspectionSearchLoading) {
                           return Center(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                              ),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -140,13 +133,20 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                                   const SizedBox(height: 16),
                                   const Text(
                                     'Searching...',
-                                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 6),
                                   const Text(
                                     'Looking for vendors matching that stall number.',
-                                    style: TextStyle(color: AppColors.mediumGrey, fontSize: 13),
+                                    style: TextStyle(
+                                      color: AppColors.mediumGrey,
+                                      fontSize: 13,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -154,35 +154,50 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                             ),
                           );
                         }
-        
+
                         if (state is InspectionSearchList) {
                           final vendorsList = state.vendorList;
-        
+
                           if (vendorsList.isEmpty) {
                             return Center(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 30),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 30,
+                                ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(16),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary.withValues(alpha: .10),
+                                        color: AppColors.primary.withValues(
+                                          alpha: .10,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(Icons.search_off, size: 32, color: AppColors.primary),
+                                      child: const Icon(
+                                        Icons.search_off,
+                                        size: 32,
+                                        color: AppColors.primary,
+                                      ),
                                     ),
                                     const SizedBox(height: 16),
                                     const Text(
                                       'No vendors found',
-                                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 6),
                                     const Text(
                                       'No vendors are registered under that stall number. Double check and try again.',
-                                      style: TextStyle(color: AppColors.mediumGrey, fontSize: 13),
+                                      style: TextStyle(
+                                        color: AppColors.mediumGrey,
+                                        fontSize: 13,
+                                      ),
                                       textAlign: TextAlign.center,
                                     ),
                                   ],
@@ -190,79 +205,98 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                               ),
                             );
                           }
-                    
+
                           return Column(
                             children: [
-                              const SizedBox(height: 20,),
+                              const SizedBox(height: 20),
                               Row(
                                 spacing: 10,
                                 children: [
-                                  const Text(
-                                    'Matching vendors',
-                                  ),
+                                  const Text('Matching vendors'),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 1,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: .20),
-                                      borderRadius: BorderRadius.circular(20)
+                                      color: AppColors.primary.withValues(
+                                        alpha: .20,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       '${vendorsList.length} result${vendorsList.length > 1 ? 's' : ''}',
                                       style: const TextStyle(
-                                        color: AppColors.primary
+                                        color: AppColors.primary,
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
-                    
-                              const SizedBox(height: 10,),
-        
+
+                              const SizedBox(height: 10),
+
                               Expanded(
                                 child: ListView.builder(
                                   itemCount: vendorsList.length,
-                                  itemBuilder:(context, index) {
+                                  itemBuilder: (context, index) {
                                     final vendor = vendorsList[index];
-                                    bool isSelected = vendor.id == selectedVendor;
-                                
+                                    bool isSelected =
+                                        vendor.id == selectedVendor;
+
                                     return AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 0,
+                                      ),
                                       decoration: BoxDecoration(
                                         border: Border.all(
-                                          color: isSelected ? AppColors.primary : AppColors.lightGrey,
-                                          width: 2
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : AppColors.lightGrey,
+                                          width: 2,
                                         ),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: ListTile(
-                                        onTap: () => setState(() => selectedVendor = vendor.id),
-        
+                                        onTap: () => setState(
+                                          () => selectedVendor = vendor.id,
+                                        ),
+
                                         leading: Container(
                                           padding: const EdgeInsets.all(5),
                                           decoration: BoxDecoration(
-                                            color: AppColors.primary.withValues(alpha: .50),
-                                            borderRadius: BorderRadius.circular(50)
+                                            color: AppColors.primary.withValues(
+                                              alpha: .50,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              50,
+                                            ),
                                           ),
                                           child: Icon(
                                             Icons.storefront,
                                             color: AppColors.primary,
                                           ),
                                         ),
-                                
+
                                         title: Text(
                                           vendor.tradeName,
                                           style: TextStyle(
-                                            fontWeight: FontWeight.bold
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                
+
                                         subtitle: Text(
-                                          '${vendor.firstName} ${vendor.lastName}'
+                                          '${vendor.firstName} ${vendor.lastName}',
                                         ),
-                                
+
                                         trailing: Icon(
-                                          isSelected ? Icons.check_circle : null,
+                                          isSelected
+                                              ? Icons.check_circle
+                                              : null,
                                           color: AppColors.primary,
                                         ),
                                       ),
@@ -270,7 +304,7 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                                   },
                                 ),
                               ),
-        
+
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
@@ -278,28 +312,34 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: AppColors.primaryLight,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    padding: const EdgeInsets.symmetric(vertical: 15),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                    ),
                                   ),
-                                  onPressed: selectedVendor == null ? null : () {
-                                    final vendor = vendorsList.firstWhere((v) => v.id == selectedVendor);
-                                    _onSelectVendor(vendor);
-                                  }, 
+                                  onPressed: selectedVendor == null
+                                      ? null
+                                      : () {
+                                          final vendor = vendorsList.firstWhere(
+                                            (v) => v.id == selectedVendor,
+                                          );
+                                          _onSelectVendor(vendor);
+                                        },
                                   child: const Text(
                                     'SELECT VENDOR',
                                     style: TextStyle(
                                       color: AppColors.primaryLight,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 15
+                                      fontSize: 15,
                                     ),
-                                  )
+                                  ),
                                 ),
-                              )
+                              ),
                             ],
                           );
                         }
-                    
+
                         return Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -309,21 +349,34 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                                 Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(alpha: .10),
+                                    color: AppColors.primary.withValues(
+                                      alpha: .10,
+                                    ),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.storefront_outlined, size: 32, color: AppColors.primary),
+                                  child: const Icon(
+                                    Icons.storefront_outlined,
+                                    size: 32,
+                                    color: AppColors.primary,
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
                                   'Search results will appear here',
-                                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 6),
                                 const Text(
                                   'Enter a stall number above to find matching vendors.',
-                                  style: TextStyle(color: AppColors.mediumGrey, fontSize: 13),
+                                  style: TextStyle(
+                                    color: AppColors.mediumGrey,
+                                    fontSize: 13,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -332,11 +385,11 @@ class _SearchByStallBottomSheetState extends State<SearchByStallBottomSheet> {
                         );
                       },
                     ),
-                  )
+                  ),
                 ],
-              )
+              ),
             );
-          }
+          },
         ),
       ),
     );

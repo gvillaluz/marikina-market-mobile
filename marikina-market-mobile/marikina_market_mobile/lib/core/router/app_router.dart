@@ -21,14 +21,26 @@ class AppRouter {
       final isGoingToLogin = loc == Routes.login;
       final isGoingToMandatoryPass = loc == Routes.mandatoryChangePassword;
 
+      final unauthenticatedRoutes = {
+        Routes.login,
+        Routes.findAccount,
+        Routes.forgotPasswordOption,
+        Routes.codeVerification,
+        Routes.resetPassword,
+      };
+
+      final isUnauthenticatedRoute = unauthenticatedRoutes.contains(loc);
+
       if (authState is AuthInitial || authState is AuthLoading) {
         return isGoingToSplash ? null : Routes.splash;
       }
 
-      final isUnauthenticated = authState is Unauthenticated || 
-                                authState is AuthLogoutSuccess;
+      final isUnauthenticated =
+          authState is Unauthenticated || authState is AuthLogoutSuccess;
 
-      if (isUnauthenticated) return isGoingToLogin ? null : Routes.login;
+      if (isUnauthenticated) {
+        return isUnauthenticatedRoute ? null : Routes.login;
+      }
 
       if (authState is Authenticated) {
         if (authState.user.mustChangePassword) {
@@ -43,6 +55,6 @@ class AppRouter {
 
       return null;
     },
-    routes: appRoutes
+    routes: appRoutes,
   );
 }

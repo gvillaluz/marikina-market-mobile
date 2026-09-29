@@ -8,10 +8,7 @@ class LoginSubmitted extends AuthEvent {
   final String username;
   final String password;
 
-  LoginSubmitted({
-    required this.username,
-    required this.password
-  });
+  LoginSubmitted({required this.username, required this.password});
 }
 
 class UserUpdated extends AuthEvent {
@@ -29,7 +26,7 @@ class ChangePasswordSubmitted extends AuthEvent {
     required this.userId,
     required this.currentPassword,
     required this.newPassword,
-    required this.confirmNewPassword
+    required this.confirmNewPassword,
   });
 }
 

@@ -3,12 +3,14 @@ import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.da
 abstract class TicketEvent {}
 
 class LoadTicketSummary extends TicketEvent {
+  final String search;
   final int offset;
   final TicketStatus status;
-  
+
   LoadTicketSummary({
-    required this.offset, 
-    required this.status
+    this.search = '',
+    this.offset = 0,
+    this.status = TicketStatus.pending,
   });
 }
 

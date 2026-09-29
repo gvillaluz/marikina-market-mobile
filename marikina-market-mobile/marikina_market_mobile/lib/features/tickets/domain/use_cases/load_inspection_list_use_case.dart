@@ -8,7 +8,11 @@ class LoadInspectionListUseCase {
   final InspectionRepository _repository;
   LoadInspectionListUseCase(this._repository);
 
-  Future<Result<PageResult<InspectionTicketSummary>>> call(int offset, ViolationType type) async {
-    return await _repository.loadInspections(offset, type);
+  Future<Result<PageResult<InspectionTicketSummary>>> call(
+    String search,
+    int offset,
+    ViolationType type,
+  ) async {
+    return await _repository.loadInspections(search, offset, type);
   }
 }

@@ -6,6 +6,7 @@ import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.da
 
 abstract class TicketRepository {
   Future<Result<PageResult<TicketSummary>>> loadTickets(
+    String search,
     int offset,
     TicketStatus status,
   );

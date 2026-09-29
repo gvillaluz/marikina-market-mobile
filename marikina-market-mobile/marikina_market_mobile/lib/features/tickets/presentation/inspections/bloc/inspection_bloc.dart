@@ -7,7 +7,6 @@ import 'package:marikina_market_mobile/features/tickets/domain/entities/inspecti
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
 import 'package:marikina_market_mobile/core/shared/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/get_fine_summary_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_inspection_list_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ordinances_use_case.dart';
@@ -61,9 +60,17 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     LoadInspectionTickets event,
     Emitter<InspectionState> emit,
   ) async {
-    emit(InspectionLoading());
+    if (_hasLoadedTickets) {
+      emit(InspectionSilentLoading());
+    } else {
+      emit(InspectionLoading());
+    }
 
-    final result = await loadInspectionListUseCase(event.offset, event.type);
+    final result = await loadInspectionListUseCase(
+      event.search,
+      event.offset,
+      event.type,
+    );
 
     switch (result) {
       case Success<PageResult<InspectionTicketSummary>>():
@@ -193,7 +200,7 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
         if (_hasLoadedTickets) {
           _inspectionSummary = [..._inspectionSummary, data.inspectionSummary];
         } else {
-          add(LoadInspectionTickets(0, ViolationType.warning));
+          add(LoadInspectionTickets());
         }
 
       case ResultFailure(

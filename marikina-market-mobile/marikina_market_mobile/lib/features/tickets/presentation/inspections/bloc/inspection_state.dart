@@ -11,6 +11,8 @@ class InspectionInitial extends InspectionState {}
 
 class InspectionLoading extends InspectionState {}
 
+class InspectionSilentLoading extends InspectionState {}
+
 class InspectionTicketsLoaded extends InspectionState {
   final List<InspectionTicketSummary> ticketSummary;
   final bool hasMore;
@@ -39,10 +41,12 @@ class InspectionSubmitError extends InspectionState {
 class InspectionSaved extends InspectionState {}
 
 class InspectionSearchLoading extends InspectionState {}
+
 class InspectionSearchError extends InspectionState {
   final String error;
   InspectionSearchError(this.error);
 }
+
 class InspectionSearchList extends InspectionState {
   final List<VendorSummary> vendorList;
   InspectionSearchList(this.vendorList);

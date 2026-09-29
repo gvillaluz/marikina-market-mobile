@@ -8,7 +8,7 @@ class LoginFields extends StatefulWidget {
   const LoginFields({
     super.key,
     required this.usernameController,
-    required this.passwordController
+    required this.passwordController,
   });
 
   @override
@@ -21,33 +21,26 @@ class _LoginFieldsState extends State<LoginFields> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'USERNAME',
-          ),
-          const SizedBox(height: 7,),
+          const Text('USERNAME'),
+          const SizedBox(height: 7),
           TextField(
             controller: widget.usernameController,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.person_rounded),
 
               hintText: 'Enter your username',
-              hintStyle: TextStyle(
-                color: AppColors.lightGrey,
-                fontSize: 14
-              )
+              hintStyle: TextStyle(color: AppColors.lightGrey, fontSize: 14),
             ),
           ),
 
-          const SizedBox(height: 20,),
+          const SizedBox(height: 20),
 
-          const Text(
-            'PASSWORD',
-          ),
-          const SizedBox(height: 7,),
+          const Text('PASSWORD'),
+          const SizedBox(height: 7),
           TextField(
             controller: widget.passwordController,
             obscureText: !isPasswordVisible,
@@ -56,16 +49,17 @@ class _LoginFieldsState extends State<LoginFields> {
               suffixIcon: IconButton(
                 onPressed: () => setState(() {
                   isPasswordVisible = !isPasswordVisible;
-                }), 
-                icon: Icon(isPasswordVisible ? Icons.visibility_off_outlined : Icons.visibility)
+                }),
+                icon: Icon(
+                  isPasswordVisible
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility,
+                ),
               ),
               hintText: 'Enter your password',
-              hintStyle: TextStyle(
-                color: AppColors.lightGrey,
-                fontSize: 14
-              )
+              hintStyle: TextStyle(color: AppColors.lightGrey, fontSize: 14),
             ),
-          )
+          ),
         ],
       ),
     );

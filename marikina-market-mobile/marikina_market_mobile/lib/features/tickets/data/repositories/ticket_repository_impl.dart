@@ -30,11 +30,16 @@ class TicketRepositoryImpl implements TicketRepository {
 
   @override
   Future<Result<PageResult<TicketSummary>>> loadTickets(
+    String search,
     int offset,
     TicketStatus status,
   ) async {
     try {
-      final ticketModels = await remoteDataSource.loadTickets(offset, status);
+      final ticketModels = await remoteDataSource.loadTickets(
+        search,
+        offset,
+        status,
+      );
 
       return Result.success(ticketModels.toEntity((m) => m.toEntity()));
     } on ValidationException catch (e) {

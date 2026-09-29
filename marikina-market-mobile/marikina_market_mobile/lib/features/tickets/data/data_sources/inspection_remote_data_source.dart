@@ -16,6 +16,7 @@ import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_t
 
 abstract class InspectionRemoteDataSource {
   Future<PageResultModel<InspectionSummaryModel>> loadInspections(
+    String search,
     int offset,
     ViolationType type,
   );
@@ -33,13 +34,19 @@ class InspectionRemoteDataSourceImpl implements InspectionRemoteDataSource {
 
   @override
   Future<PageResultModel<InspectionSummaryModel>> loadInspections(
+    String search,
     int offset,
     ViolationType type,
   ) async {
     try {
-      final response = await apiClient.get(
-        '/enforcer/tickets/inspections?offset=$offset&type=${type.value}',
-      );
+      String query =
+          '/enforcer/tickets/inspections?offset=$offset&type=${type.value}';
+
+      if (search.isNotEmpty) {
+        query = '$query&search=$search';
+      }
+
+      final response = await apiClient.get(query);
 
       final data = response.data;
 

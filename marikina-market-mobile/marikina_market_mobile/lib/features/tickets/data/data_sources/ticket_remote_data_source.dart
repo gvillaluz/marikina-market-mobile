@@ -8,6 +8,7 @@ import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.da
 
 abstract class TicketRemoteDataSource {
   Future<PageResultModel<TicketSummaryModel>> loadTickets(
+    String search,
     int offset,
     TicketStatus status,
   );
@@ -20,13 +21,18 @@ class TicketRemoteDataSourceImpl implements TicketRemoteDataSource {
 
   @override
   Future<PageResultModel<TicketSummaryModel>> loadTickets(
+    String search,
     int offset,
     TicketStatus status,
   ) async {
     try {
-      final response = await apiClient.get(
-        '/enforcer/tickets?offset=$offset&status=${status.value}',
-      );
+      String query = '/enforcer/tickets?offset=$offset&status=${status.value}';
+
+      if (search.isNotEmpty) {
+        query = '$query&search=$search';
+      }
+
+      final response = await apiClient.get(query);
 
       final data = response.data;
 

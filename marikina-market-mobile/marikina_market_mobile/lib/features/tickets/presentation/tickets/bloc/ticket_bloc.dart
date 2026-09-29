@@ -27,9 +27,17 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     LoadTicketSummary event,
     Emitter<TicketState> emit,
   ) async {
-    emit(TicketLoading());
+    if (_ticketList.isEmpty) {
+      emit(TicketLoading());
+    } else {
+      emit(TicketSilentLoading());
+    }
 
-    final result = await loadTicketListUseCase(event.offset, event.status);
+    final result = await loadTicketListUseCase(
+      event.search,
+      event.offset,
+      event.status,
+    );
 
     switch (result) {
       case Success<PageResult<TicketSummary>>():

@@ -9,6 +9,7 @@ import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_typ
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_detail_evidence_section.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_penalty_detail.dart';
+import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_settlement_section.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/ticket_violation_section.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/widgets/violator_detail_section.dart';
 
@@ -236,7 +237,7 @@ class TicketDetailContent extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: ViolatorDetailSection(
-                  stallNumber: ticket.stallNumber,
+                  stallNumber: ticket.stallNumber ?? 'N/A',
                   tradeName: ticket.tradeName,
                   fullName: '${ticket.lastName}, ${ticket.firstName}',
                   address: ticket.address!,
@@ -277,7 +278,7 @@ class TicketDetailContent extends StatelessWidget {
                     penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
                     totalFineAmount: ticket.totalFineAmount ?? 0.0,
                     dueDate: ticket.dueDate ?? DateTime.now(),
-                    communityHrs: 3,
+                    communityHrs: ticket.communityServiceHours,
                   ),
                 ),
               ],
@@ -328,6 +329,14 @@ class TicketDetailContent extends StatelessWidget {
             ],
           ),
         ),
+
+        if (isTicket) ...[
+          const SizedBox(height: 20),
+          TicketSettlementSection(
+            penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
+            requiredHours: ticket.communityServiceHours,
+          ),
+        ],
 
         if (isTicket) ...[
           const SizedBox(height: 20),
@@ -395,6 +404,14 @@ class TicketDetailContent extends StatelessWidget {
             TicketDetailEvidenceSection(
               evidences: ticket.evidenceUrls!,
               isTicket: isTicket,
+            ),
+          ],
+
+          if (isTicket) ...[
+            const SizedBox(height: 20),
+            TicketSettlementSection(
+              penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
+              requiredHours: ticket.communityServiceHours,
             ),
           ],
         ],

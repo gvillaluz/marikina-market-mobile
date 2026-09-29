@@ -49,7 +49,8 @@ class TicketPenaltyDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final penalty = penaltyType == PenaltyType.communityService
+    final penalty =
+        penaltyType == PenaltyType.communityService && communityHrs != null
         ? '${penaltyType.value} ($communityHrs hrs)'
         : penaltyType.value;
 
