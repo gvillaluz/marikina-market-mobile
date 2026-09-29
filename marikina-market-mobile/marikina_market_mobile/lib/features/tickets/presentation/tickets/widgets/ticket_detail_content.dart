@@ -332,14 +332,6 @@ class TicketDetailContent extends StatelessWidget {
 
         if (isTicket) ...[
           const SizedBox(height: 20),
-          TicketSettlementSection(
-            penaltyType: ticket.penaltyType ?? PenaltyType.cashFine,
-            requiredHours: ticket.communityServiceHours,
-          ),
-        ],
-
-        if (isTicket) ...[
-          const SizedBox(height: 20),
 
           const Text(
             'Photo Evidence Record',
