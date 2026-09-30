@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/features/notification/domain/entities/notification_list_data.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_bloc.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_event.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/bloc/notification_state.dart';
@@ -17,6 +18,37 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   String selectedOption = 'All';
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients ||
+        !_scrollController.position.atEdge ||
+        _scrollController.position.pixels <
+            _scrollController.position.maxScrollExtent) {
+      return;
+    }
+
+    final state = context.read<NotificationBloc>().state;
+    if (state is NotificationLoaded && state.hasMore && !state.isLoadingMore) {
+      context.read<NotificationBloc>().add(
+        LoadNotifications(state.notifications.length, selectedOption),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +72,14 @@ class _NotificationPageState extends State<NotificationPage> {
             );
             await context.read<NotificationBloc>().stream.firstWhere(
               (state) =>
-                  state is NotificationLoaded || state is NotificationFailed,
+                  (state is NotificationLoaded &&
+                      !state.isRefreshing &&
+                      !state.isLoadingMore) ||
+                  state is NotificationFailed,
             );
           },
           child: CustomScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverPadding(
@@ -98,7 +134,21 @@ class _NotificationPageState extends State<NotificationPage> {
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 760),
                           child: NotificationList(
-                            notifications: state.notifications,
+                            data: NotificationListData(
+                              notifications: state.notifications,
+                              hasMore: state.hasMore,
+                              isLoadingMore: state.isLoadingMore,
+                              errorMessage: state.errorMessage,
+                              isLoadMoreError: state.isLoadMoreError,
+                            ),
+                            onRetry: () => context.read<NotificationBloc>().add(
+                              LoadNotifications(
+                                state.isLoadMoreError
+                                    ? state.notifications.length
+                                    : 0,
+                                selectedOption,
+                              ),
+                            ),
                             onRead: (id) => context
                                 .read<NotificationBloc>()
                                 .add(MarkAsRead(id)),

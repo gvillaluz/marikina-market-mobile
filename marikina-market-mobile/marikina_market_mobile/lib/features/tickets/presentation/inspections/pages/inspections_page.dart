@@ -23,7 +23,6 @@ class InspectionsPage extends StatefulWidget {
 class _InspectionPageState extends State<InspectionsPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _isLoadingMore = false;
   ViolationType _selectedViolationType = ViolationType.warning;
 
   Timer? _debouncer;
@@ -46,14 +45,16 @@ class _InspectionPageState extends State<InspectionsPage> {
   void _onScroll() {
     if (!_scrollController.hasClients) return;
 
-    final threshold = _scrollController.position.maxScrollExtent - 200;
+    if (!_scrollController.position.atEdge ||
+        _scrollController.position.pixels <
+            _scrollController.position.maxScrollExtent) {
+      return;
+    }
     final state = context.read<InspectionBloc>().state;
 
-    if (_scrollController.position.pixels >= threshold &&
-        !_isLoadingMore &&
-        state is InspectionTicketsLoaded &&
-        state.hasMore) {
-      setState(() => _isLoadingMore = true);
+    if (state is InspectionTicketsLoaded &&
+        state.hasMore &&
+        !state.isLoadingMore) {
       context.read<InspectionBloc>().add(
         LoadInspectionTickets(
           search: _searchController.text.trim(),
@@ -106,133 +107,127 @@ class _InspectionPageState extends State<InspectionsPage> {
 
           await context.read<InspectionBloc>().stream.firstWhere(
             (state) =>
-                state is InspectionTicketsLoaded || state is InspectionError,
+                (state is InspectionTicketsLoaded &&
+                    !state.isRefreshing &&
+                    !state.isLoadingMore) ||
+                state is InspectionError,
           );
         },
-        child: BlocListener<InspectionBloc, InspectionState>(
-          listener: (context, state) {
-            if (state is InspectionTicketsLoaded || state is InspectionError) {
-              setState(() => _isLoadingMore = false);
-            }
-          },
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Inspections',
-                        style: TextStyle(
-                          color: AppColors.primaryBlack,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                        ),
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Inspections',
+                      style: TextStyle(
+                        color: AppColors.primaryBlack,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
                       ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Review and manage issued inspection tickets.',
-                        style: TextStyle(
-                          color: AppColors.mediumGrey,
-                          fontSize: 14,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Review and manage issued inspection tickets.',
+                      style: TextStyle(
+                        color: AppColors.mediumGrey,
+                        fontSize: 14,
                       ),
-                      const SizedBox(height: 18),
-                      AppPrimaryButton(
-                        label: 'New Inspection',
-                        iconData: Icons.add,
-                        onPressed: () =>
-                            context.pushNamed(Routes.newInspectionName),
-                      ),
-                      const SizedBox(height: 18),
-                      ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: _searchController,
-                        builder: (context, value, child) {
-                          return TextField(
-                            controller: _searchController,
-                            onChanged: _onSearchChanged,
-                            textInputAction: TextInputAction.search,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(
-                                Icons.search,
-                                color: AppColors.mediumGrey,
-                              ),
-                              suffixIcon: value.text.isEmpty
-                                  ? null
-                                  : IconButton(
-                                      tooltip: 'Clear search',
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        _onSearchChanged('');
-                                      },
-                                      icon: const Icon(Icons.close),
-                                    ),
-                              hintText: 'Search inspections',
-                              hintStyle: const TextStyle(
-                                color: AppColors.mediumGrey,
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: AppColors.lightGrey.withValues(
-                                    alpha: 0.65,
+                    ),
+                    const SizedBox(height: 18),
+                    AppPrimaryButton(
+                      label: 'New Inspection',
+                      iconData: Icons.add,
+                      onPressed: () =>
+                          context.pushNamed(Routes.newInspectionName),
+                    ),
+                    const SizedBox(height: 18),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _searchController,
+                      builder: (context, value, child) {
+                        return TextField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: AppColors.mediumGrey,
+                            ),
+                            suffixIcon: value.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    tooltip: 'Clear search',
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      _onSearchChanged('');
+                                    },
+                                    icon: const Icon(Icons.close),
                                   ),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(
-                                  color: AppColors.primary,
-                                  width: 1.5,
+                            hintText: 'Search inspections',
+                            hintStyle: const TextStyle(
+                              color: AppColors.mediumGrey,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide(
+                                color: AppColors.lightGrey.withValues(
+                                  alpha: 0.65,
                                 ),
                               ),
                             ),
-                            onTapOutside: (event) =>
-                                FocusScope.of(context).unfocus(),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 14),
-                      FilterRow(
-                        typeSelected: _selectedViolationType,
-                        onChange: _handleChangeType,
-                      ),
-                    ],
-                  ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          onTapOutside: (event) =>
+                              FocusScope.of(context).unfocus(),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    FilterRow(
+                      typeSelected: _selectedViolationType,
+                      onChange: _handleChangeType,
+                    ),
+                  ],
                 ),
               ),
+            ),
 
-              InspectionListSection(
-                onRetry: () => context.read<InspectionBloc>().add(
+            InspectionListSection(
+              onRetry: () {
+                final state = context.read<InspectionBloc>().state;
+                context.read<InspectionBloc>().add(
                   LoadInspectionTickets(
                     search: _searchController.text.trim(),
-                    offset: 0,
+                    offset:
+                        state is InspectionTicketsLoaded &&
+                            state.isLoadMoreError
+                        ? state.ticketSummary.length
+                        : 0,
                     type: _selectedViolationType,
                   ),
-                ),
-              ),
+                );
+              },
+            ),
 
-              SliverToBoxAdapter(
-                child: _isLoadingMore
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            ],
-          ),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          ],
         ),
       ),
     );

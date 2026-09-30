@@ -11,6 +11,7 @@ import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinanc
 import 'package:marikina_market_mobile/core/shared/domain/entities/page_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/vendor_summary.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/warning_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/repositories/inspection_repository.dart';
 
@@ -128,6 +129,28 @@ class InspectionRepositoryImpl implements InspectionRepository {
       );
 
       return Result.success(fineModels.toEntity());
+    } on ValidationException catch (e) {
+      return Result.failure(ValidationFailure(e.message));
+    } on NetworkException catch (e) {
+      return Result.failure(NetworkFailure(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(ServerFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Result<List<WarningOrdinance>>> checkWarningOrdinances(
+    List<int> ordinanceIds,
+    int vendorId,
+  ) async {
+    try {
+      final warningModels = await remoteDataSource.checkWarningOrdinances(
+        ordinanceIds,
+        vendorId,
+      );
+      return Result.success(
+        warningModels.map((model) => model.toEntity()).toList(),
+      );
     } on ValidationException catch (e) {
       return Result.failure(ValidationFailure(e.message));
     } on NetworkException catch (e) {

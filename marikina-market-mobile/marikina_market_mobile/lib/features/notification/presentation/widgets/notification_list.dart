@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
-import 'package:marikina_market_mobile/features/notification/domain/entities/notification_summary.dart';
+import 'package:marikina_market_mobile/features/notification/domain/entities/notification_list_data.dart';
 import 'package:marikina_market_mobile/features/notification/presentation/widgets/notification_tile.dart';
 
 class NotificationList extends StatelessWidget {
-  final List<NotificationSummary> notifications;
+  final NotificationListData data;
   final ValueChanged<int> onRead;
+  final VoidCallback? onRetry;
 
   const NotificationList({
-    required this.notifications,
+    required this.data,
     required this.onRead,
+    this.onRetry,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final notifications = data.notifications;
     final today = DateTime.now().day;
     final todayItems = notifications.where((n) => n.createdAt.day == today);
     final earlierItems = notifications.where((n) => n.createdAt.day != today);
@@ -86,6 +89,33 @@ class NotificationList extends StatelessWidget {
               ),
             ),
           ],
+
+          if (data.isLoadingMore)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (data.errorMessage != null)
+            Center(
+              child: TextButton(
+                onPressed: onRetry,
+                child: Text(
+                  data.isLoadMoreError
+                      ? 'Unable to load more notifications. Try again.'
+                      : 'Refresh failed. Try again.',
+                ),
+              ),
+            )
+          else if (!data.hasMore && notifications.isNotEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              child: Center(
+                child: Text(
+                  'Nothing follows',
+                  style: TextStyle(color: AppColors.mediumGrey, fontSize: 12),
+                ),
+              ),
+            ),
         ],
       ),
     );

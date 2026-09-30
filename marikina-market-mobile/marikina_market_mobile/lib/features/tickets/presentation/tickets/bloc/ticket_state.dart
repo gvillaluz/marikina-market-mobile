@@ -14,7 +14,40 @@ class TicketSilentLoading extends TicketState {}
 class TicketsLoaded extends TicketState {
   final List<TicketSummary> ticketSummary;
   final bool hasMore;
-  TicketsLoaded(this.ticketSummary, this.hasMore);
+  final bool isLoadingMore;
+  final bool isRefreshing;
+  final String? errorMessage;
+  final bool isLoadMoreError;
+
+  TicketsLoaded(
+    this.ticketSummary,
+    this.hasMore, {
+    this.isLoadingMore = false,
+    this.isRefreshing = false,
+    this.errorMessage,
+    this.isLoadMoreError = false,
+  });
+
+  TicketsLoaded copyWith({
+    List<TicketSummary>? ticketSummary,
+    bool? hasMore,
+    bool? isLoadingMore,
+    bool? isRefreshing,
+    String? errorMessage,
+    bool? isLoadMoreError,
+    bool clearErrorMessage = false,
+  }) {
+    return TicketsLoaded(
+      ticketSummary ?? this.ticketSummary,
+      hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      errorMessage: clearErrorMessage
+          ? null
+          : errorMessage ?? this.errorMessage,
+      isLoadMoreError: isLoadMoreError ?? this.isLoadMoreError,
+    );
+  }
 }
 
 class TicketError extends TicketState {

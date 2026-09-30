@@ -45,58 +45,59 @@ class InspectionListSection extends StatelessWidget {
           return SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4, top: 2),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'INSPECTION RECORDS',
-                              style: TextStyle(
-                                color: AppColors.mediumGrey,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ),
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: AppColors.tertiary,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              child: Text(
-                                '${state.ticketSummary.length}',
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == 0) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: InspectionCard(
-                      ticketSummary: state.ticketSummary[index - 1],
+                    padding: const EdgeInsets.only(bottom: 4, top: 2),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'INSPECTION RECORDS',
+                            style: TextStyle(
+                              color: AppColors.mediumGrey,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.tertiary,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            child: Text(
+                              '${state.ticketSummary.length}',
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
-                },
-                childCount: state.ticketSummary.length + 1,
-              ),
+                }
+
+                if (index == state.ticketSummary.length + 1) {
+                  return _buildFooter(state);
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: InspectionCard(
+                    ticketSummary: state.ticketSummary[index - 1],
+                  ),
+                );
+              }, childCount: state.ticketSummary.length + 2),
             ),
           );
         }
@@ -114,6 +115,42 @@ class InspectionListSection extends StatelessWidget {
         return const SliverToBoxAdapter(child: SizedBox.shrink());
       },
     );
+  }
+
+  Widget _buildFooter(InspectionTicketsLoaded state) {
+    if (state.isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (state.errorMessage != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: TextButton(
+            onPressed: onRetry,
+            child: Text(
+              state.isLoadMoreError
+                  ? 'Unable to load more inspections. Try again.'
+                  : 'Refresh failed. Try again.',
+            ),
+          ),
+        ),
+      );
+    }
+    if (!state.hasMore && state.ticketSummary.isNotEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 18),
+        child: Center(
+          child: Text(
+            'Nothing follows',
+            style: TextStyle(color: AppColors.mediumGrey, fontSize: 12),
+          ),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   SliverToBoxAdapter _buildNotice({

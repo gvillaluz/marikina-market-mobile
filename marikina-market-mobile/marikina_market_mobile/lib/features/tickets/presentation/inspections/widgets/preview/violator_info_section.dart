@@ -10,7 +10,7 @@ class ViolatorInfoSection extends StatelessWidget {
   const ViolatorInfoSection({
     required this.vendor,
     required this.isTicket,
-    super.key
+    super.key,
   });
 
   @override
@@ -20,29 +20,26 @@ class ViolatorInfoSection extends StatelessWidget {
         const Row(
           spacing: 7,
           children: [
-            Icon(
-              Icons.person,
-              color: AppColors.primary,
-            ),
+            Icon(Icons.person, color: AppColors.primary),
             Text(
               'VIOLATOR DETAILS',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 18
-              ),
-            )
+              style: TextStyle(color: AppColors.primary, fontSize: 18),
+            ),
           ],
         ),
-        const SizedBox(height: 20,),
-        DetailRow(label: "STALL/UNIT NO:", value: vendor.stallNumber),
-        const SizedBox(height: 10,),
+        const SizedBox(height: 20),
+        DetailRow(label: "STALL/UNIT NO:", value: vendor.stallNumber ?? 'N/A'),
+        const SizedBox(height: 10),
         DetailRow(label: "TRADE NAME:", value: vendor.tradeName),
-        const SizedBox(height: 10,),
-        DetailRow(label: "NAME:", value: '${vendor.lastName}, ${vendor.firstName}'),
+        const SizedBox(height: 10),
+        DetailRow(
+          label: "NAME:",
+          value: '${vendor.lastName}, ${vendor.firstName}',
+        ),
         if (isTicket) ...[
-          const SizedBox(height: 10,),
-          DetailRow(label: "ADDRESS:", value: vendor.address)
-        ]
+          const SizedBox(height: 10),
+          DetailRow(label: "ADDRESS:", value: vendor.address),
+        ],
       ],
     );
   }

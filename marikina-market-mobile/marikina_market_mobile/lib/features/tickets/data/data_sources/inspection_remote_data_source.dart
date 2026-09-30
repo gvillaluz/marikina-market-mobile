@@ -12,6 +12,7 @@ import 'package:marikina_market_mobile/core/shared/data/models/page_result_model
 import 'package:marikina_market_mobile/features/tickets/data/models/params/save_inspection_params.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/save_inspection_result_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/vendor_summary_model.dart';
+import 'package:marikina_market_mobile/features/tickets/data/models/warning_ordinance_model.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 
 abstract class InspectionRemoteDataSource {
@@ -24,6 +25,10 @@ abstract class InspectionRemoteDataSource {
   Future<VendorSummaryModel> getVendorByCode(String codeValue);
   Future<List<VendorSummaryModel>> getVendorByStall(String stallNumber);
   Future<FineSummaryModel> getFineSummary(List<int> ordinanceIds, int vendorId);
+  Future<List<WarningOrdinanceModel>> checkWarningOrdinances(
+    List<int> ordinanceIds,
+    int vendorId,
+  );
   Future<SaveInspectionResultModel> saveInspection(SaveInspectionParams params);
 }
 
@@ -174,13 +179,44 @@ class InspectionRemoteDataSourceImpl implements InspectionRemoteDataSource {
           e.response?.data['message'] ?? 'Invalid stall number',
         );
       }
-
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.receiveTimeout) {
         throw NetworkException('No internet connection. Please try again.');
       }
 
+      throw ServerException('Something went wrong. Please try again later');
+    }
+  }
+
+  @override
+  Future<List<WarningOrdinanceModel>> checkWarningOrdinances(
+    List<int> ordinanceIds,
+    int vendorId,
+  ) async {
+    try {
+      final response = await apiClient.post(
+        '/enforcer/tickets/warning-check',
+        data: {'ordinance_ids': ordinanceIds, 'vendor_id': vendorId},
+      );
+      final data = response.data as List<dynamic>;
+      return data
+          .map(
+            (item) =>
+                WarningOrdinanceModel.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        throw ValidationException(
+          e.response?.data['message'] ?? 'Unable to check warning ordinances.',
+        );
+      }
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('No internet connection. Please try again.');
+      }
       throw ServerException('Something went wrong. Please try again later');
     }
   }

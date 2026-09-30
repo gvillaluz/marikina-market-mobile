@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
 import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail_content_data.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_settlement_data.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_bloc.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/tickets/bloc/ticket_state.dart';
@@ -77,14 +79,24 @@ class TicketDetailPage extends StatelessWidget {
 
                 if (state is TicketDetailLoaded) {
                   return TicketDetailContent(
-                    ticket: state.ticket,
-                    droppedOrdinances: droppedOrdinances,
-                    receiptProof: state.receiptProof,
-                    isReceiptSubmitted: state.isReceiptSubmitted,
-                    communityServiceProgress: state.communityServiceProgress,
-                    isSettlementLoading: state.isSettlementLoading,
-                    isSettlementLoaded: state.isSettlementLoaded,
-                    isSubmittingSettlement: state.isSubmittingSettlement,
+                    data: TicketDetailContentData(
+                      ticket: state.ticket,
+                      droppedOrdinances: droppedOrdinances,
+                      settlement: TicketSettlementData(
+                        ticketId: state.ticket.ticketId,
+                        penaltyType:
+                            state.ticket.penaltyType ?? PenaltyType.cashFine,
+                        ticketStatus: state.ticket.ticketStatus!,
+                        requiredHours: state.ticket.communityServiceHours,
+                        receiptProof: state.receiptProof,
+                        isReceiptSubmitted: state.isReceiptSubmitted,
+                        communityServiceProgress:
+                            state.communityServiceProgress,
+                        isLoading: state.isSettlementLoading,
+                        isLoaded: state.isSettlementLoaded,
+                        isSubmitting: state.isSubmittingSettlement,
+                      ),
+                    ),
                     onRetrySettlementLoad: () {
                       context.read<TicketBloc>().add(
                         LoadTicketSettlement(

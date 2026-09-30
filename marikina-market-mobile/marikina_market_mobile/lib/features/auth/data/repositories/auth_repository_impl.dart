@@ -9,14 +9,18 @@ import 'package:marikina_market_mobile/features/auth/data/data_sources/auth_remo
 import 'package:marikina_market_mobile/features/auth/data/models/user_model.dart';
 import 'package:marikina_market_mobile/features/auth/domain/entities/user.dart';
 import 'package:marikina_market_mobile/features/auth/domain/repositories/auth_repository.dart';
+import 'package:marikina_market_mobile/features/auth/domain/services/token_service.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
+  final TokenService tokenService;
+  Future<Result<Unit>>? _refreshInFlight;
 
-  const AuthRepositoryImpl({
+  AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.tokenService,
   });
 
   @override
@@ -28,6 +32,13 @@ class AuthRepositoryImpl implements AuthRepository {
         DateTime.now(),
       );
       if (!sessionRecoverable) return Result.success(null);
+
+      if (tokenService.isAccessTokenExpired(authTokens.accessToken)) {
+        final refreshResult = await refreshTokens();
+        if (refreshResult case ResultFailure(failure: final failure)) {
+          return Result.failure(failure);
+        }
+      }
 
       final userModel = await localDataSource.getUser();
 
@@ -130,7 +141,20 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<Unit>> refreshTokens() async {
+  Future<Result<Unit>> refreshTokens() {
+    final inFlight = _refreshInFlight;
+    if (inFlight != null) return inFlight;
+
+    final refresh = _performRefreshTokens();
+    _refreshInFlight = refresh;
+    return refresh.whenComplete(() {
+      if (identical(_refreshInFlight, refresh)) {
+        _refreshInFlight = null;
+      }
+    });
+  }
+
+  Future<Result<Unit>> _performRefreshTokens() async {
     try {
       final tokens = await localDataSource.getTokens();
       final freshTokens = await remoteDataSource.refreshAuthTokens(

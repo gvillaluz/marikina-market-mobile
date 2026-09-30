@@ -44,7 +44,7 @@ class RootScreen extends StatelessWidget {
       title: Text(
         _titles[navigationShell.currentIndex],
         style: const TextStyle(
-          color: AppColors.primaryBlack,
+          color: AppColors.primary,
           fontSize: 18,
           fontWeight: FontWeight.w700,
           letterSpacing: .2,
