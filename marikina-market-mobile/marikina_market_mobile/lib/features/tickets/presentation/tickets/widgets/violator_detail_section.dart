@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:marikina_market_mobile/core/constants/app_colors.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/ticket_detail.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/widgets/detail_row.dart';
 
 class ViolatorDetailSection extends StatelessWidget {
-  final String stallNumber;
-  final String tradeName;
-  final String fullName;
-  final String address;
+  final TicketDetail ticket;
   final bool isTicket;
 
   const ViolatorDetailSection({
-    required this.stallNumber,
-    required this.tradeName,
-    required this.fullName,
-    required this.address,
+    required this.ticket,
     required this.isTicket,
-    super.key
+    super.key,
   });
 
   @override
@@ -25,29 +19,33 @@ class ViolatorDetailSection extends StatelessWidget {
       children: [
         const Row(
           children: [
-            Icon(
-              Icons.person,
-              color: AppColors.primary,
-            ),
+            Icon(Icons.person, color: AppColors.primary),
             Text(
               'VIOLATOR DETAILS',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 18
-              ),
-            )
+              style: TextStyle(color: AppColors.primary, fontSize: 18),
+            ),
           ],
         ),
-        const SizedBox(height: 20,),
-        DetailRow(label: "STALL/UNIT NO:", value: stallNumber),
-        const SizedBox(height: 10,),
-        DetailRow(label: "TRADE NAME:", value: tradeName),
-        const SizedBox(height: 10,),
-        DetailRow(label: "NAME:", value: fullName),
+        const SizedBox(height: 20),
+        DetailRow(label: "BUSINESS ID:", value: ticket.businessId),
+        const SizedBox(height: 10),
+        DetailRow(label: "STALL/UNIT NO:", value: ticket.stallNumber ?? 'N/A'),
+        const SizedBox(height: 10),
+        DetailRow(label: "TRADE NAME:", value: ticket.tradeName),
+        const SizedBox(height: 10),
+        DetailRow(
+          label: "NAME:",
+          value: '${ticket.lastName}, ${ticket.firstName}',
+        ),
         if (isTicket) ...[
-          const SizedBox(height: 10,),
-          DetailRow(label: "ADDRESS:", value: address)
-        ]
+          const SizedBox(height: 10),
+          DetailRow(
+            label: "ADDRESS:",
+            value: ticket.address?.trim().isNotEmpty == true
+                ? ticket.address!.trim()
+                : 'Address is unavailable.',
+          ),
+        ],
       ],
     );
   }

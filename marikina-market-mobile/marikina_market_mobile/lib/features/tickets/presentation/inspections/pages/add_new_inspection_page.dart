@@ -1,6 +1,5 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -10,13 +9,13 @@ import 'package:marikina_market_mobile/core/di/dependency_injection.dart';
 import 'package:marikina_market_mobile/core/router/routes.dart';
 import 'package:marikina_market_mobile/core/shared/domain/enums/severity.dart';
 import 'package:marikina_market_mobile/core/shared/presentation/widgets/app_primary_btn.dart';
-import 'package:marikina_market_mobile/core/utils/date_formatter_util.dart';
 import 'package:marikina_market_mobile/features/auth/domain/entities/user.dart';
-import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_breakdown_item.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/duplicate_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/fine_summary.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/inspection_form_data.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/vendor_summary.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/warning_ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/penalty_type.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_bloc.dart';
@@ -185,7 +184,7 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
       return;
     }
 
-    final fineSummary = await showModalBottomSheet(
+    final selectionResult = await showModalBottomSheet<dynamic>(
       context: context,
       enableDrag: true,
       showDragHandle: true,
@@ -203,12 +202,30 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
       ),
     );
 
-    if (fineSummary != null) {
+    if (selectionResult is List<WarningOrdinance>) {
+      _showOrdinanceConflictBanner(
+        title: 'Existing warning ordinances',
+        message:
+            'The vendor has already received a warning for these ordinances. They were removed from this inspection.',
+        ordinances: selectionResult
+            .map(
+              (ordinance) => DuplicateOrdinance(
+                ordinanceId: ordinance.ordinanceId,
+                ordinanceNo: ordinance.ordinanceNo,
+                ordinanceCode: ordinance.ordinanceCode,
+              ),
+            )
+            .toList(),
+      );
+      return;
+    }
+
+    if (selectionResult is FineSummary) {
       bool hasDuplicate = false;
-      List<FineBreakdownItem> duplicateOrdinances = [];
+      List<DuplicateOrdinance> duplicateOrdinances = [];
 
       setState(() {
-        _fineSummary = fineSummary;
+        _fineSummary = selectionResult;
         if (_highestSelectedSeverity == Severity.high) {
           _selectedPenaltyType = PenaltyType.cashFine;
         }
@@ -222,7 +239,14 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
           hasDuplicate = true;
 
           duplicateOrdinances = _fineSummary!.breakdownItems
-              .where((f) => f.isDuplicate == true)
+              .where((f) => f.isDuplicate)
+              .map(
+                (item) => DuplicateOrdinance(
+                  ordinanceId: item.ordinanceId,
+                  ordinanceNo: item.ordinanceNo,
+                  ordinanceCode: item.ordinanceCode,
+                ),
+              )
               .toList();
 
           _selectedOrdinances.removeWhere(
@@ -233,36 +257,89 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
       });
 
       if (hasDuplicate) {
-        ScaffoldMessenger.of(context).showMaterialBanner(
-          MaterialBanner(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            backgroundColor: AppColors.tertiaryYellow,
-            leading: const Icon(
-              Icons.warning,
-              color: AppColors.secondaryYellow,
-            ),
-            content: const Text(
-              'Removed: Vendor already has an open ticket for this ordinance.',
-              style: TextStyle(color: AppColors.secondaryYellow),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => showAdaptiveDialog(
-                  context: context,
-                  builder: (_) => DuplicateWarningDialog(
-                    duplicateOrdinances: duplicateOrdinances,
-                  ),
-                ),
-                child: const Text(
-                  'SHOW',
-                  style: TextStyle(color: AppColors.secondaryYellow),
-                ),
-              ),
-            ],
-          ),
+        _showOrdinanceConflictBanner(
+          title: 'Existing ticket ordinances',
+          message:
+              'The vendor already has an open ticket for these ordinances. They were removed from this inspection.',
+          ordinances: duplicateOrdinances,
         );
       }
     }
+  }
+
+  void _showOrdinanceConflictBanner({
+    required String title,
+    required String message,
+    required List<DuplicateOrdinance> ordinances,
+  }) {
+    if (ordinances.isEmpty) return;
+
+    final messenger = ScaffoldMessenger.of(context)
+      ..hideCurrentMaterialBanner();
+    final ordinanceCount = ordinances.length;
+    final ordinanceLabel = ordinanceCount == 1 ? 'ordinance' : 'ordinances';
+    messenger.showMaterialBanner(
+      MaterialBanner(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        forceActionsBelow: false,
+        backgroundColor: AppColors.tertiaryYellow,
+        leading: const Icon(
+          Icons.warning_amber_rounded,
+          color: AppColors.secondaryYellow,
+          size: 22,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.secondaryYellow,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '$ordinanceCount $ordinanceLabel excluded from this inspection.',
+              style: const TextStyle(
+                color: AppColors.secondaryYellow,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => showAdaptiveDialog(
+              context: context,
+              builder: (_) => DuplicateWarningDialog(
+                title: title,
+                description: message,
+                duplicateOrdinances: ordinances,
+              ),
+            ),
+            child: const Text(
+              'VIEW',
+              style: TextStyle(
+                color: AppColors.secondaryYellow,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Dismiss',
+            visualDensity: VisualDensity.compact,
+            onPressed: messenger.hideCurrentMaterialBanner,
+            icon: const Icon(
+              Icons.close,
+              color: AppColors.secondaryYellow,
+              size: 20,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void addEvidence(XFile photo) => setState(() {
@@ -277,10 +354,6 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
     setState(() {
       _vendorError = null;
       _vendorSummary = vendor;
-
-      _selectedType = vendor.canIssueWarning
-          ? _selectedType
-          : ViolationType.ticket;
     });
   }
 
@@ -435,70 +508,8 @@ class _AddNewInspectionPageState extends State<AddNewInspectionPage> {
                             _ordinanceError = null;
                             _communityHrsError = null;
                           }),
-                          isEnabled: _vendorSummary!.canIssueWarning,
+                          isEnabled: true,
                         ),
-
-                        const SizedBox(height: 20),
-
-                        if (!_vendorSummary!.canIssueWarning) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 15,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.tertiaryYellow.withValues(
-                                alpha: .50,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: AppColors.primaryYellow,
-                              ),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 10,
-                              children: [
-                                Icon(
-                                  Icons.warning_amber,
-                                  color: AppColors.secondaryYellow,
-                                  size: 30,
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    spacing: 5,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'A warning has already been issued to this vendor for this week.',
-                                        style: TextStyle(
-                                          color: AppColors.secondaryYellow,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        softWrap: true,
-                                      ),
-
-                                      if (_vendorSummary
-                                              ?.activeWarningIssuedAt !=
-                                          null) ...[
-                                        Text(
-                                          DateTimeFormatter.getDateTime(
-                                            _vendorSummary!
-                                                .activeWarningIssuedAt!,
-                                          ),
-                                          style: TextStyle(
-                                            color: AppColors.mediumGrey,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
 
                         const SizedBox(height: 20),
 

@@ -60,6 +60,7 @@ import 'package:marikina_market_mobile/features/tickets/data/repositories/ticket
 import 'package:marikina_market_mobile/features/tickets/domain/repositories/inspection_repository.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/repositories/ticket_repository.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/get_fine_summary_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/check_warning_ordinances_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_inspection_list_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_community_service_progress_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_ordinances_use_case.dart';
@@ -84,6 +85,7 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
         final result = await refreshUseCase.call();
         return result is Success;
       },
+      waitForRefresh: () => sl<RefreshTokensUseCase>().waitForOngoingRefresh(),
       onAuthFailure: () async {
         sl<AuthBloc>().add(LogoutUser(true));
       },
@@ -104,7 +106,11 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
     () => AuthRemoteDataSourceImpl(apiClient: sl()),
   );
   sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(localDataSource: sl(), remoteDataSource: sl()),
+    () => AuthRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+      tokenService: sl(),
+    ),
   );
   sl.registerLazySingleton(() => CheckAuthStatusUseCase(sl()));
   sl.registerLazySingleton(() => LoginUserUseCase(sl()));
@@ -174,6 +180,7 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
   sl.registerLazySingleton(() => SearchVendorByCodeUseCase(sl()));
   sl.registerLazySingleton(() => SearchVendorByStallUseCase(sl()));
   sl.registerLazySingleton(() => GetFineSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => CheckWarningOrdinancesUseCase(sl()));
   sl.registerLazySingleton(() => SaveInspectionTicketUseCase(sl()));
   sl.registerFactory(
     () => InspectionBloc(
@@ -182,6 +189,7 @@ Future<void> init(Box<OrdinanceHiveModel> ordinanceBox) async {
       searchVendorByCodeUseCase: sl(),
       searchVendorByStallUseCase: sl(),
       getFineSummaryUseCase: sl(),
+      checkWarningOrdinancesUseCase: sl(),
       saveInspectionTicketUseCase: sl(),
     ),
   );

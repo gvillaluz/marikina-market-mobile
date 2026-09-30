@@ -44,8 +44,12 @@ class _SelectOrdinanceBottomSheetState
     if (widget.vendorId == null) return;
 
     if (widget.isWarningTicket) {
-      widget.onChanged(_selectedOrdinance);
-      Navigator.pop(context, null);
+      context.read<InspectionBloc>().add(
+        WarningOrdinanceCheckRequested(
+          _selectedOrdinance.map((ordinance) => ordinance.id).toList(),
+          widget.vendorId!,
+        ),
+      );
       return;
     }
 
@@ -75,7 +79,24 @@ class _SelectOrdinanceBottomSheetState
           Navigator.pop(context, state.summary);
         }
 
+        if (state is WarningOrdinanceCheckLoaded) {
+          final warningOrdinanceIds = state.ordinances
+              .map((ordinance) => ordinance.ordinanceId)
+              .toSet();
+          _selectedOrdinance.removeWhere(
+            (ordinance) => warningOrdinanceIds.contains(ordinance.id),
+          );
+          widget.onChanged(_selectedOrdinance);
+          Navigator.pop(context, state.ordinances);
+        }
+
         if (state is FineSummaryError) {
+          setState(() {
+            _conflictMessage = state.message;
+          });
+        }
+
+        if (state is WarningOrdinanceCheckError) {
           setState(() {
             _conflictMessage = state.message;
           });
@@ -298,7 +319,9 @@ class _SelectOrdinanceBottomSheetState
                                       InspectionState
                                     >(
                                       builder: (context, state) {
-                                        if (state is FineSummaryLoading) {
+                                        if (state is FineSummaryLoading ||
+                                            state
+                                                is WarningOrdinanceCheckLoading) {
                                           return SizedBox(
                                             height: 20,
                                             width: 20,

@@ -26,6 +26,11 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
 
   List<TicketSummary> _ticketList = [];
   List<TicketSummary> get getTicketList => _ticketList;
+  String _listSearch = '';
+  TicketStatus _listStatus = TicketStatus.pending;
+  bool _hasMoreTickets = false;
+  bool _isLoadingMoreTickets = false;
+  int _listRequestId = 0;
 
   TicketBloc({
     required this.loadTicketListUseCase,
@@ -46,27 +51,70 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     LoadTicketSummary event,
     Emitter<TicketState> emit,
   ) async {
-    if (_ticketList.isEmpty) {
-      emit(TicketLoading());
+    final isLoadMore = event.offset > 0;
+    if (isLoadMore) {
+      final current = state;
+      if (_isLoadingMoreTickets ||
+          current is! TicketsLoaded ||
+          !current.hasMore ||
+          !_hasMoreTickets ||
+          event.offset != _ticketList.length ||
+          event.search != _listSearch ||
+          event.status != _listStatus) {
+        return;
+      }
+      _isLoadingMoreTickets = true;
+      emit(current.copyWith(isLoadingMore: true, clearErrorMessage: true));
     } else {
-      emit(TicketSilentLoading());
+      final queryChanged =
+          event.search != _listSearch || event.status != _listStatus;
+      _listSearch = event.search;
+      _listStatus = event.status;
+      _listRequestId++;
+      _isLoadingMoreTickets = false;
+      if (queryChanged) {
+        _ticketList = [];
+        _hasMoreTickets = false;
+      }
+
+      if (_ticketList.isEmpty) {
+        emit(TicketLoading());
+      } else {
+        emit(TicketsLoaded(_ticketList, _hasMoreTickets, isRefreshing: true));
+      }
     }
 
+    final requestId = _listRequestId;
     final result = await loadTicketListUseCase(
       event.search,
       event.offset,
       event.status,
     );
+    if (requestId != _listRequestId) return;
 
     switch (result) {
       case Success<PageResult<TicketSummary>>():
         _ticketList = event.offset == 0
             ? result.data.items
             : [..._ticketList, ...result.data.items];
-        emit(TicketsLoaded(_ticketList, result.data.hasMore));
+        _hasMoreTickets = result.data.hasMore && result.data.items.isNotEmpty;
+        _isLoadingMoreTickets = false;
+        emit(TicketsLoaded(_ticketList, _hasMoreTickets));
 
-      case ResultFailure():
-        emit(TicketsLoaded([], false));
+      case ResultFailure(failure: final failure):
+        _isLoadingMoreTickets = false;
+        if (_ticketList.isEmpty) {
+          emit(TicketError(failure.message));
+        } else {
+          emit(
+            TicketsLoaded(
+              _ticketList,
+              _hasMoreTickets,
+              errorMessage: failure.message,
+              isLoadMoreError: isLoadMore,
+            ),
+          );
+        }
     }
   }
 

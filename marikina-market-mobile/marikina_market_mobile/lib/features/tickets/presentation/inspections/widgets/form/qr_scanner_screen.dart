@@ -84,17 +84,17 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         appBar: AppBar(
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.arrow_back, color: AppColors.primaryLight),
+            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           ),
           title: const Text(
             'Scan QR Code',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryLight,
+              color: AppColors.primary,
             ),
           ),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.primaryLight,
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.primary,
           actions: [
             ValueListenableBuilder(
               valueListenable: _controller,

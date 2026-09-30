@@ -9,6 +9,11 @@ import 'package:marikina_market_mobile/features/notification/presentation/bloc/n
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final LoadNotificationsUseCase loadNotificationsUseCase;
   final MarkAsReadUseCase markAsReadUseCase;
+  List<NotificationSummary> _notifications = [];
+  String _filter = 'All';
+  bool _hasMore = false;
+  bool _isLoadingMore = false;
+  int _listRequestId = 0;
 
   NotificationBloc({
     required this.loadNotificationsUseCase,
@@ -22,17 +27,63 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     LoadNotifications event,
     Emitter emit,
   ) async {
-    emit(NotificationLoading());
+    final isLoadMore = event.offset > 0;
+    if (isLoadMore) {
+      final current = state;
+      if (_isLoadingMore ||
+          current is! NotificationLoaded ||
+          !current.hasMore ||
+          !_hasMore ||
+          event.offset != _notifications.length ||
+          event.filter != _filter) {
+        return;
+      }
+      _isLoadingMore = true;
+      emit(current.copyWith(isLoadingMore: true, clearErrorMessage: true));
+    } else {
+      final filterChanged = event.filter != _filter;
+      _filter = event.filter;
+      _listRequestId++;
+      _isLoadingMore = false;
+      if (filterChanged) {
+        _notifications = [];
+        _hasMore = false;
+      }
+      if (_notifications.isEmpty) {
+        emit(NotificationLoading());
+      } else {
+        emit(NotificationLoaded(_notifications, _hasMore, isRefreshing: true));
+      }
+    }
 
+    final requestId = _listRequestId;
     final result = await loadNotificationsUseCase(event.offset, event.filter);
+    if (requestId != _listRequestId) return;
 
     switch (result) {
       case Success(:final data):
-        emit(NotificationLoaded(data.items, data.hasMore));
+        _notifications = event.offset == 0
+            ? data.items
+            : [..._notifications, ...data.items];
+        _hasMore = data.hasMore && data.items.isNotEmpty;
+        _isLoadingMore = false;
+        emit(NotificationLoaded(_notifications, _hasMore));
         break;
 
       case ResultFailure(failure: final failure):
-        emit(NotificationFailed(failure.message));
+        _isLoadingMore = false;
+        if (_notifications.isEmpty) {
+          emit(NotificationFailed(failure.message));
+        } else {
+          emit(
+            NotificationLoaded(
+              _notifications,
+              _hasMore,
+              errorMessage: failure.message,
+              isLoadMoreError: isLoadMore,
+            ),
+          );
+        }
     }
   }
 
@@ -61,7 +112,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         );
       }).toList();
 
-      emit(NotificationLoaded(updatedNotifications, current.hasMore));
+      _notifications = updatedNotifications;
+      emit(current.copyWith(notifications: updatedNotifications));
     }
 
     await markAsReadUseCase(event.id);

@@ -36,6 +36,13 @@ class FineSummaryRequested extends InspectionEvent {
   FineSummaryRequested(this.ordinanceIds, this.vendorId);
 }
 
+class WarningOrdinanceCheckRequested extends InspectionEvent {
+  final List<int> ordinanceIds;
+  final int vendorId;
+
+  WarningOrdinanceCheckRequested(this.ordinanceIds, this.vendorId);
+}
+
 class NewTicketSubmitted extends InspectionEvent {
   final int vendorId;
   final int enforcerId;

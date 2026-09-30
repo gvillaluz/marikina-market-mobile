@@ -5,8 +5,9 @@ import 'package:marikina_market_mobile/core/errors/exceptions.dart';
 import 'package:marikina_market_mobile/core/network/client.dart';
 import 'package:marikina_market_mobile/core/shared/data/models/page_result_model.dart';
 import 'package:marikina_market_mobile/core/shared/domain/enums/ticket_status.dart';
+import 'package:marikina_market_mobile/features/tickets/data/models/community_service_progress_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/ticket_detail_model.dart';
-import 'package:marikina_market_mobile/features/tickets/data/models/ticket_settlement_models.dart';
+import 'package:marikina_market_mobile/features/tickets/data/models/ticket_receipt_proof_model.dart';
 import 'package:marikina_market_mobile/features/tickets/data/models/ticket_summary_model.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/submit_community_service_log_params.dart';
 

@@ -13,6 +13,9 @@ import 'package:marikina_market_mobile/features/tickets/domain/use_cases/load_or
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/save_inspection_ticket_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/search_vendor_by_code_use_case.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/use_cases/search_vendor_by_stall_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/use_cases/check_warning_ordinances_use_case.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/warning_ordinance.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/enums/violation_type.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_event.dart';
 import 'package:marikina_market_mobile/features/tickets/presentation/inspections/bloc/inspection_state.dart';
 
@@ -22,10 +25,16 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
   final SearchVendorByCodeUseCase searchVendorByCodeUseCase;
   final SearchVendorByStallUseCase searchVendorByStallUseCase;
   final GetFineSummaryUseCase getFineSummaryUseCase;
+  final CheckWarningOrdinancesUseCase checkWarningOrdinancesUseCase;
   final SaveInspectionTicketUseCase saveInspectionTicketUseCase;
 
   List<InspectionTicketSummary> _inspectionSummary = [];
   List<InspectionTicketSummary> get inspectionSummaries => _inspectionSummary;
+  String _listSearch = '';
+  ViolationType _listType = ViolationType.warning;
+  bool _hasMoreInspections = false;
+  bool _isLoadingMoreInspections = false;
+  int _listRequestId = 0;
 
   List<Ordinance> _ordinances = [];
   List<Ordinance> get ordinances => _ordinances;
@@ -37,6 +46,7 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     required this.searchVendorByCodeUseCase,
     required this.searchVendorByStallUseCase,
     required this.getFineSummaryUseCase,
+    required this.checkWarningOrdinancesUseCase,
     required this.saveInspectionTicketUseCase,
   }) : super(InspectionInitial()) {
     on<LoadOrdinances>(_onLoadOrdinances);
@@ -45,6 +55,7 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     on<SearchByStallNumberRequested>(_onSearchByStallNumberRequested);
     on<LoadOrdinanceSelection>(_onLoadOrdinanceSelection);
     on<FineSummaryRequested>(_onFineSummaryRequested);
+    on<WarningOrdinanceCheckRequested>(_onWarningOrdinanceCheckRequested);
     on<NewInspectionSubmitted>(_onNewInspectionSubmitted);
   }
 
@@ -60,17 +71,53 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
     LoadInspectionTickets event,
     Emitter<InspectionState> emit,
   ) async {
-    if (_hasLoadedTickets) {
-      emit(InspectionSilentLoading());
+    final isLoadMore = event.offset > 0;
+    if (isLoadMore) {
+      final current = state;
+      if (_isLoadingMoreInspections ||
+          current is! InspectionTicketsLoaded ||
+          !current.hasMore ||
+          !_hasMoreInspections ||
+          event.offset != _inspectionSummary.length ||
+          event.search != _listSearch ||
+          event.type != _listType) {
+        return;
+      }
+      _isLoadingMoreInspections = true;
+      emit(current.copyWith(isLoadingMore: true, clearErrorMessage: true));
     } else {
-      emit(InspectionLoading());
+      final queryChanged =
+          event.search != _listSearch || event.type != _listType;
+      _listSearch = event.search;
+      _listType = event.type;
+      _listRequestId++;
+      _isLoadingMoreInspections = false;
+      if (queryChanged) {
+        _inspectionSummary = [];
+        _hasMoreInspections = false;
+        _hasLoadedTickets = false;
+      }
+
+      if (_inspectionSummary.isEmpty) {
+        emit(InspectionLoading());
+      } else {
+        emit(
+          InspectionTicketsLoaded(
+            _inspectionSummary,
+            _hasMoreInspections,
+            isRefreshing: true,
+          ),
+        );
+      }
     }
 
+    final requestId = _listRequestId;
     final result = await loadInspectionListUseCase(
       event.search,
       event.offset,
       event.type,
     );
+    if (requestId != _listRequestId) return;
 
     switch (result) {
       case Success<PageResult<InspectionTicketSummary>>():
@@ -78,10 +125,27 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
             ? result.data.items
             : [..._inspectionSummary, ...result.data.items];
         _hasLoadedTickets = true;
-        emit(InspectionTicketsLoaded(_inspectionSummary, result.data.hasMore));
+        _hasMoreInspections =
+            result.data.hasMore && result.data.items.isNotEmpty;
+        _isLoadingMoreInspections = false;
+        emit(InspectionTicketsLoaded(_inspectionSummary, _hasMoreInspections));
 
-      case ResultFailure<PageResult<InspectionTicketSummary>>():
-        emit(InspectionTicketsLoaded([], false));
+      case ResultFailure<PageResult<InspectionTicketSummary>>(
+        failure: final failure,
+      ):
+        _isLoadingMoreInspections = false;
+        if (_inspectionSummary.isEmpty) {
+          emit(InspectionError(failure.message));
+        } else {
+          emit(
+            InspectionTicketsLoaded(
+              _inspectionSummary,
+              _hasMoreInspections,
+              errorMessage: failure.message,
+              isLoadMoreError: isLoadMore,
+            ),
+          );
+        }
     }
   }
 
@@ -171,6 +235,25 @@ class InspectionBloc extends Bloc<InspectionEvent, InspectionState> {
 
       case ResultFailure():
         emit(FineSummaryError('Something went wrong. Please try again.'));
+    }
+  }
+
+  Future<void> _onWarningOrdinanceCheckRequested(
+    WarningOrdinanceCheckRequested event,
+    Emitter<InspectionState> emit,
+  ) async {
+    emit(WarningOrdinanceCheckLoading());
+
+    final result = await checkWarningOrdinancesUseCase(
+      event.ordinanceIds,
+      event.vendorId,
+    );
+
+    switch (result) {
+      case Success<List<WarningOrdinance>>(:final data):
+        emit(WarningOrdinanceCheckLoaded(data));
+      case ResultFailure(failure: final failure):
+        emit(WarningOrdinanceCheckError(failure.message));
     }
   }
 

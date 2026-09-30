@@ -4,6 +4,7 @@ import 'package:marikina_market_mobile/features/tickets/domain/entities/inspecti
 import 'package:marikina_market_mobile/features/tickets/domain/entities/ordinance.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/save_inspection_result.dart';
 import 'package:marikina_market_mobile/features/tickets/domain/entities/vendor_summary.dart';
+import 'package:marikina_market_mobile/features/tickets/domain/entities/warning_ordinance.dart';
 
 abstract class InspectionState {}
 
@@ -16,8 +17,40 @@ class InspectionSilentLoading extends InspectionState {}
 class InspectionTicketsLoaded extends InspectionState {
   final List<InspectionTicketSummary> ticketSummary;
   final bool hasMore;
+  final bool isLoadingMore;
+  final bool isRefreshing;
+  final String? errorMessage;
+  final bool isLoadMoreError;
 
-  InspectionTicketsLoaded(this.ticketSummary, this.hasMore);
+  InspectionTicketsLoaded(
+    this.ticketSummary,
+    this.hasMore, {
+    this.isLoadingMore = false,
+    this.isRefreshing = false,
+    this.errorMessage,
+    this.isLoadMoreError = false,
+  });
+
+  InspectionTicketsLoaded copyWith({
+    List<InspectionTicketSummary>? ticketSummary,
+    bool? hasMore,
+    bool? isLoadingMore,
+    bool? isRefreshing,
+    String? errorMessage,
+    bool? isLoadMoreError,
+    bool clearErrorMessage = false,
+  }) {
+    return InspectionTicketsLoaded(
+      ticketSummary ?? this.ticketSummary,
+      hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      errorMessage: clearErrorMessage
+          ? null
+          : errorMessage ?? this.errorMessage,
+      isLoadMoreError: isLoadMoreError ?? this.isLoadMoreError,
+    );
+  }
 }
 
 class InspectionError extends InspectionState {
@@ -84,6 +117,18 @@ class FineSummaryNetworkError extends InspectionState {
 class FineSummaryLoaded extends InspectionState {
   final FineSummary summary;
   FineSummaryLoaded(this.summary);
+}
+
+class WarningOrdinanceCheckLoading extends InspectionState {}
+
+class WarningOrdinanceCheckLoaded extends InspectionState {
+  final List<WarningOrdinance> ordinances;
+  WarningOrdinanceCheckLoaded(this.ordinances);
+}
+
+class WarningOrdinanceCheckError extends InspectionState {
+  final String message;
+  WarningOrdinanceCheckError(this.message);
 }
 
 class SubmitNewTicketLoading extends InspectionState {}

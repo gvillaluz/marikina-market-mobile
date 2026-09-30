@@ -8,17 +8,15 @@ class VendorSummaryBanner extends StatelessWidget {
   const VendorSummaryBanner({
     required this.vendor,
     required this.onChangeVendor,
-    super.key
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.lightGrey
-        ),
-        borderRadius: BorderRadius.circular(10)
+        border: Border.all(color: AppColors.lightGrey),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: [
@@ -48,21 +46,15 @@ class VendorSummaryBanner extends StatelessWidget {
                         vendor.tradeName,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16
+                          fontSize: 16,
                         ),
                       ),
+                      Text('Business ID: ${vendor.businessId}'),
+                      Text('${vendor.lastName}, ${vendor.firstName}'),
                       Text(
-                        'Vendor ID: ${vendor.username}'
+                        '${vendor.stallNumber ?? 'No stall assigned'} \u2022 ${vendor.marketSectionName}',
+                        style: TextStyle(color: AppColors.mediumGrey),
                       ),
-                      Text(
-                        '${vendor.lastName}, ${vendor.firstName}'
-                      ),
-                      Text(
-                        '${vendor.stallNumber} \u2022 ${vendor.marketSectionName}',
-                        style: TextStyle(
-                          color: AppColors.mediumGrey
-                        ),
-                      )
                     ],
                   ),
                 ),
@@ -70,7 +62,7 @@ class VendorSummaryBanner extends StatelessWidget {
             ),
           ),
 
-          const Divider(height: 1,),
+          const Divider(height: 1),
 
           SizedBox(
             width: double.infinity,
@@ -78,13 +70,13 @@ class VendorSummaryBanner extends StatelessWidget {
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.all(10),
                 iconSize: 25,
-                shape: RoundedRectangleBorder()
+                shape: RoundedRectangleBorder(),
               ),
-              onPressed: onChangeVendor, 
+              onPressed: onChangeVendor,
               icon: const Icon(Icons.sync),
-              label: const Text('Change Vendor')
+              label: const Text('Change Vendor'),
             ),
-          )
+          ),
         ],
       ),
     );
